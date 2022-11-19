@@ -1,0 +1,744 @@
+openapi: 3.0.1
+info:
+  title: PhotoBlog API
+  description: API to create a Bearer Authentication Token with OpenAPI 3.0
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local Server
+paths:
+    /:
+      get:
+        tags:
+          - API management
+        summary: Get the API status
+        description: Get the API status
+        operationId: getApiStatus
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      description: API status
+                      example: OK
+                  required:
+                    - status
+          '500':
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      description: Error message
+                      example: Internal Server Error
+                  required:
+                    - error
+    /login:
+      post:
+        tags: ["user management"]
+        summary: Logs in the user
+        description: If the user not exist,
+          it will be created and
+          an identification token will be returned
+          if the user exist, the user identifier will be returned
+        operationId: doLogin
+        requestBody:
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          required: true
+        responses:
+          201:
+            description: User log-in action successful
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Token"
+          400:  
+            description: Invalid username/password supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /feed:
+      get:
+        tags:
+          - feed stream
+        summary: Get feed
+        description: Get the feed of the user
+        operationId: getFeed
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+          400:
+            description: Invalid User
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/{id}:
+      get:
+        tags:
+          - user info
+        summary: Get User Profile
+        description: Get a user profile
+        operationId: getUserProfile
+        parameters:
+          - name: id
+            in: path
+            description: id of the user that needs to be fetched
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid id supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/me:
+      get:
+        tags:
+          - user info
+        summary: Get My Account
+        description: Get my account
+        operationId: getMyAccount
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/me/change_name:
+      post:
+        tags:
+          - user management
+        summary: Change My Name
+        description: Change my name
+        operationId: changeMyName
+        requestBody:
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          required: true
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid username/password supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/{id}/follow:
+      put:
+        tags:
+          - social network
+        summary: Follow User
+        description: Follow a user
+        operationId: followUser
+        parameters:
+          - name: id
+            in: path
+            description: id of the user that needs to be followed
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid id supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/{id}/unfollow:
+      delete:
+        tags:
+          - social network
+        summary: Unfollow User
+        description: Unfollow a user
+        operationId: unfollowUser
+        parameters:
+          - name: id
+            in: path
+            description: id of the user that needs to be unfollowed
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid id supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/{id}/ban:
+      put:
+        tags:
+          - social network
+        summary: Ban User
+        description: Ban a user
+        operationId: banUser
+        parameters:
+          - name: id
+            in: path
+            description: id that wants to ban another user
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid id supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/{id}/unban:
+      delete:
+        tags:
+          - social network 
+        summary: Unban User
+        description: Unban a user
+        operationId: unbanUser
+        parameters:
+          - name: id
+            in: path
+            description: id that wants to unban another user
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid id supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/{id}/photos:
+      get:
+        tags:
+          - user info
+        summary: Get User Photos
+        description: Get a user photos
+        operationId: getUserPhotos
+        parameters:
+          - name: id
+            in: path
+            description: id of the user that needs to be fetched
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+          400:
+            description: Invalid id supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /users/search/{search_username}:
+      get:
+        tags:
+          - user management
+        summary: Search User
+        description: Search a user by username
+        operationId: getMyUserName
+        parameters:
+          - name: username
+            in: query
+            description: Username to search
+            required: true
+            schema:
+              type: string
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid username supplied
+          404:
+            description: User not found
+          500:
+            description: Internal Server Error
+    /photos/upload:
+      post:
+        tags:
+          - photos
+        summary: Upload Photo
+        description: Upload a new photo
+        operationId: uploadPhoto
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                $ref: "#/components/schemas/Photo"
+          required: true
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+          400:
+            description: Invalid photo
+          500:
+            description: Internal Server Error
+
+    /photos/{id}:
+      get:
+        tags:
+            - photos
+        summary: Get Photo
+        description: Get a photo
+        operationId: getPhoto
+        parameters:
+          - name: id
+            in: path
+            description: ID of the photo that needs to be fetched
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+          400:
+            description: Invalid photo ID supplied
+          404:
+            description: Photo not found
+          500:
+            description: Internal Server Error
+      delete:
+        tags:
+          - photos
+        summary: Delete Photo
+        description: Delete a photo
+        operationId: deletePhoto
+        parameters:
+          - name: id
+            in: path
+            description: ID of the photo that needs to be deleted
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+          400:
+            description: Invalid photo ID supplied
+          404:
+            description: Photo not found
+          500:
+            description: Internal Server Error
+    /photos/{id}/like:
+      put:
+        tags:
+          - photos
+        summary: Like Photo
+        description: Like a photo
+        operationId: likePhoto
+        parameters:
+          - name: id
+            in: path
+            description: ID of the photo that needs to be liked
+            schema:
+              type: string
+            required: true
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+          400:
+            description: Invalid photo id supplied
+          404:
+            description: Photo not found
+          500:
+            description: Internal Server Error
+    /photos/{id}/unlike:
+      delete:
+        tags:
+          - photos
+        summary: Unlike Photo
+        description: Unlike a photo
+        operationId: unlikePhoto
+        parameters:
+          - name: id
+            in: path
+            description: id of the photo that needs to be unliked
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+          400:
+            description: Invalid photo id supplied
+          404:
+            description: Photo not found
+          500:
+            description: Internal Server Error
+    /photos/{id}/comments:
+      get:
+        tags:
+          - photos
+        summary: Get Photo Comments
+        description: Get comments for a photo
+        operationId: getPhotoComments
+        parameters:
+          - name: id
+            in: path
+            description: id of the photo that needs to be fetched
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Comment"
+          400:
+            description: Invalid photo id supplied
+          404:
+            description: Photo not found
+          500:
+            description: Internal Server Error
+    /photos/{id}/comments/upload:
+      post:
+        tags:
+          - photos
+        summary: Post Photo Comment
+        description: Post a comment for a photo
+        operationId: postPhotoComment
+        parameters:
+          - name: id
+            in: path
+            description: id of the photo that needs to be commented
+            required: true
+            schema:
+              type: string
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Comment"
+          400:
+            description: Invalid photo id supplied
+          404:
+            description: Photo not found
+          500:
+            description: Internal Server Error
+    /photos/{photoId}/comments/{commentId}:
+      get:
+        tags:
+          - photos
+        summary: Get Photo Comment
+        description: Get a comment for a photo
+        operationId: getPhotoComment
+        parameters:
+          - name: photoId
+            in: path
+            description: id of the photo that needs to be fetched
+            required: true
+            schema:
+              type: string
+          - name: commentId
+            in: path
+            description: id of the comment that needs to be fetched
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Comment"
+          400:
+            description: Invalid photo id supplied
+          404:
+            description: Photo not found
+          500:
+            description: Internal Server Error
+      delete:
+        tags:
+          - photos
+        summary: Delete Photo Comment
+        description: Delete a comment for a photo
+        operationId: deletePhotoComment
+        parameters:
+          - name: photoId
+            in: path
+            description: ID of the photo that needs to be commented
+            required: true
+            schema:
+              type: string
+          - name: commentId
+            in: path
+            description: ID of the comment that needs to be deleted
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Comment"
+          400:
+            description: Invalid photoId or commentId supplied
+          404:
+            description: Photo or comment not found
+          500:
+            description: Internal Server Error
+    /photos/{photoId}/comments/{commentId}/like:
+      put:
+        tags:
+          - photos
+        summary: Like Photo Comment
+        description: Like a comment for a photo
+        operationId: likePhotoComment
+        parameters:
+          - name: photoId
+            in: path
+            description: ID of the photo that needs to be commented
+            required: true
+            schema:
+              type: string
+          - name: commentId
+            in: path
+            description: ID of the comment that needs to be liked
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Comment"
+          400:
+            description: Invalid photoId or commentId supplied
+          404:
+            description: Photo or comment not found
+          500:
+            description: Internal Server Error
+
+    /photos/{photoId}/comments/{commentId}/unlike:
+      delete:
+        tags:
+          - photos
+        summary: Unlike Photo Comment
+        description: Unlike a comment for a photo
+        operationId: unlikePhotoComment
+        parameters:
+          - name: photoId
+            in: path
+            description: ID of the photo that needs to be commented
+            required: true
+            schema:
+              type: string
+          - name: commentId
+            in: path
+            description: ID of the comment that needs to be unliked
+            required: true
+            schema:
+              type: string
+        security:
+          - bearerAuth: []
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Comment"
+          400:
+            description: Invalid photoId or commentId supplied
+          404:
+            description: Photo or comment not found
+          500:
+            description: Internal Server Error
+components:
+  securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: integer
+  schemas:
+    Photo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the photo
+          example: 1
+        title:
+          type: string
+          description: Title of the photo
+          example: The photo title
+        description:
+          type: string
+          description: Description of the photo
+          example: The photo description
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the comment
+          example: 1
+        text:
+          type: string
+          description: Text of the comment
+          example: The comment text
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the user
+          example: 1
+        username:
+          type: string
+          description: Username of the user
+          example: Maria
+          pattern: "^.*?$"
+          minLength: 3
+          maxLength: 16
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token of the user
+          example: "abcdef012345"
