@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: PhotoBlog API
+  title: WASAPhoto API
   description: API to create a Bearer Authentication Token with OpenAPI 3.0
   version: 1.0.0
 servers:
