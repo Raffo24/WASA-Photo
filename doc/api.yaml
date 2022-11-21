@@ -1,8 +1,21 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: WASAPhoto API
   description: API to create a Bearer Authentication Token with OpenAPI 3.0
   version: 1.0.0
+tags:
+  - name: "API management"
+    description: "API management"
+  - name: "user management"
+    description: "user management"
+  - name: "feed stream"
+    description: "feed stream"
+  - name: user info
+    description: user info
+  - name: social network
+    description: social network
+  - name: photos
+    description: photos
 servers:
   - url: http://localhost:8080
     description: Local Server
@@ -20,30 +33,23 @@ paths:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                      description: API status
-                      example: OK
-                  required:
-                    - status
+                  $ref: '#/components/schemas/ApiStatus'
+                examples:
+                  apiStatus:
+                    $ref: '#/components/examples/ApiStatus'
           '500':
             description: Internal Server Error
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-                      description: Error message
-                      example: Internal Server Error
-                  required:
-                    - error
+                  $ref: '#/components/schemas/ApiError'
+                examples:
+                  apiError:
+                    $ref: '#/components/examples/ApiError'
     /login:
       post:
-        tags: ["user management"]
+        tags:
+          - user management
         summary: Logs in the user
         description: If the user not exist,
           it will be created and
@@ -66,10 +72,22 @@ paths:
                   $ref: "#/components/schemas/Token"
           400:  
             description: Invalid username/password supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /feed:
       get:
         tags:
@@ -88,10 +106,22 @@ paths:
                   $ref: "#/components/schemas/Photo"
           400:
             description: Invalid User
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /users/{id}:
       get:
         tags:
@@ -99,6 +129,8 @@ paths:
         summary: Get User Profile
         description: Get a user profile
         operationId: getUserProfile
+        security:
+          - bearerAuth: []
         parameters:
           - name: id
             in: path
@@ -106,10 +138,11 @@ paths:
             required: true
             schema:
               type: string
-        security:
-          - bearerAuth: []
+              minLength: 5
+              maxLength: 5
+              pattern: "[A-Za-z0-9]*"
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
@@ -117,37 +150,38 @@ paths:
                   $ref: "#/components/schemas/User"
           400:
             description: Invalid id supplied
-          404:
-            description: User not found
-          500:
-            description: Internal Server Error
-    /users/me:
-      get:
-        tags:
-          - user info
-        summary: Get My Account
-        description: Get my account
-        operationId: getMyAccount
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/User"
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
-    /users/me/change_name:
-      post:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
+      put:
         tags:
-          - user management
-        summary: Change My Name
-        description: Change my name
-        operationId: changeMyName
+          - user info
+        summary: Update User Profile
+        description: Update a user profile
+        operationId: updateUserProfile
+        parameters:
+          - name: id
+            in: path
+            description: id of the user that needs to be updated
+            required: true
+            schema:
+              type: string
+              minLength: 5
+              maxLength: 5
+              pattern: "[A-Za-z0-9]*"
         requestBody:
           description: User details
           content:
@@ -158,20 +192,32 @@ paths:
         security:
           - bearerAuth: []
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
                 schema:
                   $ref: "#/components/schemas/User"
           400:
-            description: Invalid username/password supplied
+            description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /users/{id}/follow:
-      put:
+      post:
         tags:
           - social network
         summary: Follow User
@@ -184,10 +230,13 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
@@ -195,11 +244,22 @@ paths:
                   $ref: "#/components/schemas/User"
           400:
             description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
-    /users/{id}/unfollow:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
       delete:
         tags:
           - social network
@@ -213,6 +273,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -224,12 +287,24 @@ paths:
                   $ref: "#/components/schemas/User"
           400:
             description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /users/{id}/ban:
-      put:
+      post:
         tags:
           - social network
         summary: Ban User
@@ -242,10 +317,13 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
@@ -253,11 +331,22 @@ paths:
                   $ref: "#/components/schemas/User"
           400:
             description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
-    /users/{id}/unban:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
       delete:
         tags:
           - social network 
@@ -271,6 +360,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*" 
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -282,10 +374,22 @@ paths:
                   $ref: "#/components/schemas/User"
           400:
             description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /users/{id}/photos:
       get:
         tags:
@@ -300,6 +404,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -311,11 +418,23 @@ paths:
                   $ref: "#/components/schemas/Photo"
           400:
             description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
-    /users/search/{search_username}:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
+    /users/search/{username}:
       get:
         tags:
           - user management
@@ -324,11 +443,14 @@ paths:
         operationId: getMyUserName
         parameters:
           - name: username
-            in: query
-            description: Username to search
+            in: path
+            description: username of the user that needs to be fetched
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         responses:
           200:
             description: Successful operation
@@ -338,11 +460,23 @@ paths:
                   $ref: "#/components/schemas/User"
           400:
             description: Invalid username supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           404:
             description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/userNotFound"
           500:
             description: Internal Server Error
-    /photos/upload:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
+    /photos:
       post:
         tags:
           - photos
@@ -358,7 +492,7 @@ paths:
         security:
           - bearerAuth: []
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
@@ -366,8 +500,16 @@ paths:
                   $ref: "#/components/schemas/Photo"
           400:
             description: Invalid photo
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
 
     /photos/{id}:
       get:
@@ -383,6 +525,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -394,10 +539,22 @@ paths:
                   $ref: "#/components/schemas/Photo"
           400:
             description: Invalid photo ID supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           404:
             description: Photo not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
       delete:
         tags:
           - photos
@@ -411,6 +568,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -422,12 +582,24 @@ paths:
                   $ref: "#/components/schemas/Photo"
           400:
             description: Invalid photo ID supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           404:
             description: Photo not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /photos/{id}/like:
-      put:
+      post:
         tags:
           - photos
         summary: Like Photo
@@ -439,11 +611,14 @@ paths:
             description: ID of the photo that needs to be liked
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
             required: true
         security:
           - bearerAuth: []
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
@@ -451,11 +626,22 @@ paths:
                   $ref: "#/components/schemas/Photo"
           400:
             description: Invalid photo id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           404:
             description: Photo not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           500:
             description: Internal Server Error
-    /photos/{id}/unlike:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
       delete:
         tags:
           - photos
@@ -469,6 +655,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -480,10 +669,22 @@ paths:
                   $ref: "#/components/schemas/Photo"
           400:
             description: Invalid photo id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           404:
             description: Photo not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /photos/{id}/comments:
       get:
         tags:
@@ -498,6 +699,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -508,12 +712,23 @@ paths:
                 schema:
                   $ref: "#/components/schemas/Comment"
           400:
-            description: Invalid photo id supplied
+            description: Invalid photo id or comment supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           404:
-            description: Photo not found
+            description: Photo or comment not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           500:
             description: Internal Server Error
-    /photos/{id}/comments/upload:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
       post:
         tags:
           - photos
@@ -527,6 +742,9 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         requestBody:
           required: true
           content:
@@ -536,7 +754,7 @@ paths:
         security:
           - bearerAuth: []
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
@@ -544,10 +762,22 @@ paths:
                   $ref: "#/components/schemas/Comment"
           400:
             description: Invalid photo id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           404:
             description: Photo not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/photoNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /photos/{photoId}/comments/{commentId}:
       get:
         tags:
@@ -562,12 +792,18 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
           - name: commentId
             in: path
             description: id of the comment that needs to be fetched
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -579,10 +815,22 @@ paths:
                   $ref: "#/components/schemas/Comment"
           400:
             description: Invalid photo id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           404:
             description: Photo not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
       delete:
         tags:
           - photos
@@ -596,12 +844,18 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
           - name: commentId
             in: path
             description: ID of the comment that needs to be deleted
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -613,12 +867,24 @@ paths:
                   $ref: "#/components/schemas/Comment"
           400:
             description: Invalid photoId or commentId supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           404:
             description: Photo or comment not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
     /photos/{photoId}/comments/{commentId}/like:
-      put:
+      post:
         tags:
           - photos
         summary: Like Photo Comment
@@ -631,16 +897,22 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
           - name: commentId
             in: path
             description: ID of the comment that needs to be liked
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
-          200:
+          201:
             description: Successful operation
             content:
               application/json:
@@ -648,12 +920,22 @@ paths:
                   $ref: "#/components/schemas/Comment"
           400:
             description: Invalid photoId or commentId supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           404:
             description: Photo or comment not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           500:
             description: Internal Server Error
-
-    /photos/{photoId}/comments/{commentId}/unlike:
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
       delete:
         tags:
           - photos
@@ -667,12 +949,18 @@ paths:
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
           - name: commentId
             in: path
             description: ID of the comment that needs to be unliked
             required: true
             schema:
               type: string
+              pattern: "[A-Za-z0-9]*"
+              minLength: 5
+              maxLength: 5
         security:
           - bearerAuth: []
         responses:
@@ -684,61 +972,144 @@ paths:
                   $ref: "#/components/schemas/Comment"
           400:
             description: Invalid photoId or commentId supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           404:
             description: Photo or comment not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/commentNotFound"
           500:
             description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiError"
 components:
   securitySchemes:
       bearerAuth:
         type: http
         scheme: bearer
         bearerFormat: integer
+  examples:
+    ApiStatus:
+      value:
+        status: "OK"
+        message: "API is up and running"
+    ApiError:
+      value:
+        status: "ERROR"
+        message: "API is down"
   schemas:
+    ApiStatus:
+      description: Status of the API
+      type: string
+      pattern: ".*"
+      minLength: 2
+      maxLength: 20
+      example: "OK"
+    ApiError:
+      type: string
+      pattern: ".*"
+      minLength: 4
+      maxLength: 20
+      description: Error message
+      example: "Api Error"
+    userNotFound:
+      type: string
+      pattern: ".*"
+      minLength: 4
+      maxLength: 40
+      description: Error message
+      example: "User not found"
+    commentNotFound:
+      type: string
+      pattern: ".*"
+      minLength: 4
+      maxLength: 40
+      description: Error message
+      example: "Photo or Comment not found"
+    photoNotFound:
+      type: string 
+      pattern: ".*"
+      minLength: 4
+      maxLength: 40
+      description: Error message
+      example: "Photo not found"
+      
     Photo:
       type: object
+      description: photo object
       properties:
         id:
           type: string
+          pattern: "[A-Za-z0-9]*"
+          minLength: 5
+          maxLength: 5
           description: ID of the photo
-          example: 1
+          example: "12131"
         title:
           type: string
+          pattern: ".*"
+          minLength: 1
+          maxLength: 20
           description: Title of the photo
-          example: The photo title
+          example: "The photo title"
         description:
           type: string
+          pattern: ".*"
+          minLength: 0
+          maxLength: 300
           description: Description of the photo
-          example: The photo description
+          example: "The photo description"
     Comment:
       type: object
+      description: comment of the photo
       properties:
         id:
           type: string
+          pattern: "[A-Za-z0-9]*"
+          minLength: 5
+          maxLength: 5
           description: ID of the comment
-          example: 1
+          example: "13123"
         text:
           type: string
+          pattern: ".*"
+          minLength: 1
+          maxLength: 300
           description: Text of the comment
-          example: The comment text
+          example: "The comment text"
     User:
+      description: user data
       type: object
       properties:
         id:
           type: string
+          pattern: "[A-Za-z0-9]*"
+          minLength: 5
+          maxLength: 5
           description: ID of the user
-          example: 1
+          example: "32112"
         username:
           type: string
+          pattern: "[A-Za-z0-9]*"
           description: Username of the user
-          example: Maria
-          pattern: "^.*?$"
+          example: "Maria"
           minLength: 3
           maxLength: 16
     Token:
+      description: Token data
       type: object
       properties:
         token:
           type: string
+          pattern: "[A-Za-z0-9]*"
           description: Token of the user
-          example: "abcdef012345"
+          example: "3211232321"
+          minLength: 3
+          maxLength: 16
+      
