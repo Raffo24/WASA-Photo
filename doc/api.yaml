@@ -34,19 +34,13 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/ApiStatus'
-                examples:
-                  apiStatus:
-                    $ref: '#/components/examples/ApiStatus'
           '500':
             description: Internal Server Error
             content:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
-                examples:
-                  Error:
-                    $ref: '#/components/examples/Error'
-    /login:
+    /session:
       post:
         tags:
           - user management
@@ -92,9 +86,9 @@ paths:
       get:
         tags:
           - feed stream
-        summary: Get feed
-        description: Get the feed of the user
-        operationId: getFeed
+        summary: Get feed stream
+        description: Get the feed stream of the user
+        operationId: getMyStream
         security:
           - bearerAuth: []
         responses:
@@ -169,11 +163,11 @@ paths:
       put:
         tags:
           - user info
-        summary: Update User Profile
-        description: Update a user profile
-        operationId: updateUserProfile
+        summary: Update Username
+        description: Update my username
+        operationId: setMyUserName
         requestBody:
-          description: User details
+          description: Username
           content:
             application/json:
               schema:
@@ -527,6 +521,7 @@ paths:
                 schema:
                   type: string
                   format: binary
+                  description: image in PNG format
           400:
             description: Invalid photo ID supplied
             content:
@@ -713,7 +708,7 @@ paths:
           - photos
         summary: Post Photo Comment
         description: Post a comment for a photo
-        operationId: postPhotoComment
+        operationId: commentPhoto
         requestBody:
           required: true
           content:
@@ -805,7 +800,7 @@ paths:
           - photos
         summary: Delete Photo Comment
         description: Delete a comment for a photo
-        operationId: deletePhotoComment
+        operationId: uncommentPhoto
         security:
           - bearerAuth: []
         responses:
@@ -934,16 +929,6 @@ components:
         type: http
         scheme: bearer
         bearerFormat: integer
-  examples:
-    ApiStatus:
-      value:
-        object:
-          status: "OK"
-    Error:
-      value:
-        object:
-          code: 400
-          message: "Invalid photo id supplied"
   schemas:
     ApiStatus:
       description: API Status
@@ -956,6 +941,8 @@ components:
           minLength: 1
           maxLength: 40
           example: "API is up and running"
+      example:
+        status: "API is up and running"
     Photo:
       type: object
       description: photo object
@@ -981,6 +968,10 @@ components:
           maxLength: 300
           description: Description of the photo
           example: "The photo description"
+      example:
+        id: "12345"
+        title: "The photo title"
+        description: "The photo description"
     Comment:
       type: object
       description: comment of the photo
@@ -999,6 +990,9 @@ components:
           maxLength: 300
           description: Text of the comment
           example: "The comment text"
+      example:
+        id: "12345"
+        text: "The comment text"
     User:
       description: user data
       type: object
@@ -1017,6 +1011,11 @@ components:
           example: "Maria"
           minLength: 3
           maxLength: 20
+      example:
+        User:
+          value:
+            id: "12345"
+            username: "Maria"
     Token:
       description: Token data
       type: object
@@ -1028,6 +1027,9 @@ components:
           example: "3211232321"
           minLength: 3
           maxLength: 20
+      example:
+        Token:
+          value: "12345wew"
     Error:
       description: Error data
       type: object
@@ -1040,11 +1042,19 @@ components:
           minLength: 1
           maxLength: 300
         errors:
+          description: Error messages
           type: array
           minItems: 0
           maxItems: 10
           items:
             $ref: "#/components/schemas/ErrorItem"
+      example:
+        Error:
+          value:
+            trace: "Invalid photo id supplied"
+            errors:
+              - code: 400
+                message: "Invalid photo id supplied"
     ErrorItem:
       description: Error item data
       type: object
@@ -1073,4 +1083,9 @@ components:
           example: "Invalid photo id supplied"
           minLength: 1
           maxLength: 40
-        
+      example:
+        ErrorItem:
+          value:
+            more_info: "More info about the error"
+            code: "400"
+            message: "Invalid photo id supplied"
