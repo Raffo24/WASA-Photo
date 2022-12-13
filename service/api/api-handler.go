@@ -6,32 +6,32 @@ import (
 
 // Handler returns an instance of httprouter.Router that handle APIs registered here
 func (rt *_router) Handler() http.Handler {
-	// Register routes
+	// POST REQUEST
+	rt.router.POST("/session", rt.loginHandler)
+	rt.router.POST("/photos", rt.uploadPhotoHandler)
+	rt.router.POST("/photos/:id/comments", rt.addCommentHandler)
+	// PUT REQUEST
+	rt.router.PUT("/users/:id", rt.changeMyNameHandler)
+	rt.router.PUT("/users/:id/follow/:followId", rt.followUserHandler)
+	rt.router.PUT("/users/:id/ban/:banId", rt.banUserHandler)
+	rt.router.PUT("/photos/:id/like/:userId", rt.likePhotoHandler)
+	// GET REQUEST
 	rt.router.GET("/", rt.getApiStatusHandler)
-	rt.router.POST("/login", rt.loginHandler)
 	rt.router.GET("/feed", rt.getFeedHandler)
-	rt.router.GET("/users/{id}", rt.getUserInfoHandler)
-	rt.router.GET("/users/me", rt.getMyInfoHandler)
-	rt.router.POST("/users/me/change_name", rt.changeMyNameHandler)
-	rt.router.PUT("/users/{id}/follow", rt.followUserHandler)
-	rt.router.DELETE("/users/{id}/unfollow", rt.unfollowUserHandler)
-	rt.router.PUT("/users/{id}/ban", rt.banUserHandler)
-	rt.router.DELETE("/users/{id}/unban", rt.unbanUserHandler)
-	rt.router.GET("/users/{id}/photos", rt.getUserPhotosHandler)
-	rt.router.GET("/users/search/{search_username}", rt.searchUserHandler)
-	rt.router.POST("/photos/upload", rt.uploadPhotoHandler)
-	rt.router.GET("/photos/{id}", rt.getPhotoHandler)
-	rt.router.DELETE("/photos/{id}", rt.deletePhotoHandler)
-	rt.router.PUT("/photos/{id}/like", rt.likePhotoHandler)
-	rt.router.DELETE("/photos/{id}/unlike", rt.unlikePhotoHandler)
-	rt.router.GET("/photos/{id}/comments", rt.getAllCommentsHandler)
-	rt.router.POST("/photos/{id}/comments/upload", rt.addCommentHandler)
-	rt.router.GET("/photos/{photoId}/comments/{commentId}", rt.getCommentHandler)
-	rt.router.DELETE("/photos/{photoId}/comments/{commentId}", rt.deleteCommentHandler)
-	rt.router.PUT("/photos/{photoId}/comments/{commentId}/like", rt.likeCommentHandler)
-	rt.router.DELETE("/photos/{photoId}/comments/{commentId}/unlike", rt.unlikeCommentHandler)
-	// Special routes
+	rt.router.GET("/users/:id", rt.getUserHandler)
+	rt.router.GET("/users/:id/photos", rt.getUserPhotosHandler)
+	rt.router.GET("/users/:id/search", rt.searchUserHandler)
+	rt.router.GET("/photos/:id", rt.getPhotoHandler)
+	rt.router.GET("/photos/:id/comments", rt.getAllCommentsHandler)
+	rt.router.GET("/comments/:commentId", rt.getCommentHandler)
 	rt.router.GET("/liveness", rt.liveness)
+	// DELETE REQUEST
+	rt.router.DELETE("/users/:id/follow/:followId", rt.unfollowUserHandler)
+	rt.router.DELETE("/users/:id/ban/:banId", rt.unbanUserHandler)
+	rt.router.DELETE("/photos/:id", rt.deletePhotoHandler)
+	rt.router.DELETE("/photos/:id/like/:userId", rt.unlikePhotoHandler)
+	rt.router.DELETE("/comments/:commentId", rt.deleteCommentHandler)
+	// Special routes
 	//context?
 	//rt.router.GET("/context", rt.wrap(rt.getContextReply))
 	return rt.router
