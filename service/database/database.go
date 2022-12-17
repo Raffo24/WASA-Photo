@@ -35,7 +35,11 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
+
+const DELETED = "DELETED"
 
 // User struct
 type User struct {
@@ -47,7 +51,7 @@ type User struct {
 type Photo struct {
 	ID        int
 	UserID    int
-	Photo     []byte
+	Photourl  string
 	CreatedAt time.Time
 }
 
@@ -98,7 +102,7 @@ type AppDatabase interface {
 	DeleteFollow(followerID int, followingID int) (string, error)
 	DeleteBan(bannedID int, bannerID int) (string, error)
 	UpdateUser(id int, username string) (User, error)
-	AddPhoto(id int, photo []byte) (Photo, error)
+	AddPhoto(id int, photourl string) (Photo, error)
 	SearchUser(username string) ([]User, error)
 	GetCommentByID(id int) (Comment, error)
 }
@@ -133,7 +137,7 @@ func createTables(db *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS photos (
 			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			userid INTEGER NOT NULL,
-			photo BLOB NOT NULL,
+			photourl varchar(100) NOT NULL,
 			createdat DATETIME DEFAULT CURRENT_TIMESTAMP,
 			foreign key (userid) references users(id)
 		);
@@ -168,7 +172,6 @@ func createTables(db *sql.DB) error {
 			foreign key (bannerId) references users(id)
 		);
 	`)
-	fmt.Printf("createTables\n")
 	return err
 }
 func (db *appdbimpl) Ping() error {
@@ -180,7 +183,10 @@ func (db *appdbimpl) GetUsers() ([]User, error) {
 		return nil, err
 	}
 	var users []User
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var id int
 		var username string
@@ -197,25 +203,28 @@ func (db *appdbimpl) GetUsers() ([]User, error) {
 }
 
 func (db *appdbimpl) GetPhotos(userID int) ([]Photo, error) {
-	rows, err := db.c.Query("SELECT id, userid, photo, createdat FROM photos where userid = ?", userID)
+	rows, err := db.c.Query("SELECT id, userid, photourl, createdat FROM photos where userid = ?", userID)
 	if err != nil {
 		return nil, err
 	}
 	var photos []Photo
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var id int
 		var userid int
-		var photo []byte
+		var photourl string
 		var createdat time.Time
-		err = rows.Scan(&id, &userid, &photo, &createdat)
+		err = rows.Scan(&id, &userid, &photourl, &createdat)
 		if err != nil {
 			return nil, err
 		}
 		photos = append(photos, Photo{
 			ID:        id,
 			UserID:    userid,
-			Photo:     photo,
+			Photourl:  photourl,
 			CreatedAt: createdat,
 		})
 	}
@@ -224,7 +233,7 @@ func (db *appdbimpl) GetPhotos(userID int) ([]Photo, error) {
 
 func (db *appdbimpl) GetPhoto(photoID int) (Photo, error) {
 	var photo Photo
-	err := db.c.QueryRow("SELECT id, userid, photo, createdat FROM photos WHERE id=?", photoID).Scan(&photo.ID, &photo.UserID, &photo.Photo, &photo.CreatedAt)
+	err := db.c.QueryRow("SELECT id, userid, photourl, createdat FROM photos WHERE id=?", photoID).Scan(&photo.ID, &photo.UserID, &photo.Photourl, &photo.CreatedAt)
 	return photo, err
 }
 func (db *appdbimpl) GetCommentsByPhotoID(photoID int) ([]Comment, error) {
@@ -233,7 +242,10 @@ func (db *appdbimpl) GetCommentsByPhotoID(photoID int) ([]Comment, error) {
 		return nil, err
 	}
 	var comments []Comment
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var id int
 		var comment string
@@ -258,7 +270,10 @@ func (db *appdbimpl) GetLikes(photoID int) ([]int, error) {
 		return nil, err
 	}
 	var usersIDThatLiked []int
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var userID int
 		err = rows.Scan(&userID)
@@ -275,7 +290,10 @@ func (db *appdbimpl) GetFollowersID(userID int) ([]int, error) {
 		return nil, err
 	}
 	var seguono []int
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var followingID int
 		err = rows.Scan(&followingID)
@@ -293,7 +311,10 @@ func (db *appdbimpl) GetFollowingID(userID int) ([]int, error) {
 		return nil, err
 	}
 	var seguiti []int
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var followingID int
 		err = rows.Scan(&followingID)
@@ -311,7 +332,10 @@ func (db *appdbimpl) GetBansID(userID int) ([]int, error) {
 		return nil, err
 	}
 	var bannati []int
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var bannedID int
 		err = rows.Scan(&bannedID)
@@ -329,20 +353,23 @@ func (db *appdbimpl) GetFeed(userID int) ([]Photo, error) {
 		return nil, err
 	}
 	var photos []Photo
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var id int
 		var userID int
-		var photo []byte
+		var photourl string
 		var createdat time.Time
-		err = rows.Scan(&id, &userID, &photo, &createdat)
+		err = rows.Scan(&id, &userID, &photourl, &createdat)
 		if err != nil {
 			return nil, err
 		}
 		photos = append(photos, Photo{
 			ID:        id,
 			UserID:    userID,
-			Photo:     photo,
+			Photourl:  photourl,
 			CreatedAt: createdat,
 		})
 	}
@@ -351,7 +378,6 @@ func (db *appdbimpl) GetFeed(userID int) ([]Photo, error) {
 
 func (db *appdbimpl) GetUserByID(id int) (User, error) {
 	var user User
-	fmt.Print(id)
 	err := db.c.QueryRow("SELECT id, username FROM users WHERE id=?", id).Scan(&user.ID, &user.Username)
 	return user, err
 }
@@ -373,12 +399,15 @@ func (db *appdbimpl) AddUser(username string) (User, error) {
 	}, err
 }
 
-func (db *appdbimpl) AddPhoto(userID int, photo []byte) (Photo, error) {
-	res, err := db.c.Exec("INSERT INTO photos (userid, photo) VALUES (?, ?)", userID, photo)
+func (db *appdbimpl) AddPhoto(userID int, photourl string) (Photo, error) {
+	res, err := db.c.Exec("INSERT INTO photos (userid, photourl) VALUES (?, ?)", userID, photourl)
 	if err != nil {
 		return Photo{}, err
 	}
 	id, err := res.LastInsertId()
+	if err != nil {
+		return Photo{}, err
+	}
 	photok, err := db.GetPhoto(int(id))
 	return photok, err
 }
@@ -432,54 +461,48 @@ func (db *appdbimpl) AddBan(bannedID int, bannerID int) (Ban, error) {
 
 func (db *appdbimpl) DeleteUser(id int) (string, error) {
 	_, err := db.c.Exec("DELETE FROM users WHERE id=?", id)
-	return "DELETED", err
+	return DELETED, err
 }
 
 func (db *appdbimpl) DeletePhoto(id int) (string, error) {
 	_, err := db.c.Exec("DELETE FROM photos WHERE id=?", id)
-	return "DELETED", err
+	return DELETED, err
 }
 
 func (db *appdbimpl) DeleteComment(id int) (string, error) {
 	_, err := db.c.Exec("DELETE FROM comments WHERE id=?", id)
-	return "DELETED", err
+	return DELETED, err
 }
 
 func (db *appdbimpl) DeleteLike(photoID int, userID int) (string, error) {
 	_, err := db.c.Exec("DELETE FROM likes WHERE photoid=? AND userid=?", photoID, userID)
-	return "DELETED", err
+	return DELETED, err
 }
 
 func (db *appdbimpl) DeleteFollow(followerID int, followingID int) (string, error) {
 	if followerID == followingID {
-		return "", errors.New("Cannot unfollow yourself")
+		return "", errors.New("CAN'T UNFOLLOW YOURSELF")
 	}
 	_, err := db.c.Exec("DELETE FROM follows WHERE followerid=? AND followingid=?", followerID, followingID)
-	return "DELETED", err
+	return DELETED, err
 }
 
 func (db *appdbimpl) DeleteBan(bannedID int, bannerID int) (string, error) {
 	if bannedID == bannerID {
-		return "", errors.New("Cannot unban yourself")
+		return "", errors.New("CAN'T UNBAN YOURSELF")
 	}
 	_, err := db.c.Exec("DELETE FROM bans WHERE bannedid=? AND bannerid=?", bannedID, bannerID)
-	return "DELETED", err
+	return DELETED, err
 }
 
 func (db *appdbimpl) UpdateUser(id int, username string) (User, error) {
 	_, err := db.c.Exec("UPDATE users SET username=? WHERE id=?", username, id)
 	if err != nil {
-		fmt.Print(err)
+		logrus.Error(err)
 		return User{}, err
 	}
 	user, err := db.GetUserByID(id)
 	return user, err
-}
-
-func (db *appdbimpl) DownloadPhoto(userid int) ([]byte, error) {
-	var photo []byte
-	err := db.c.QueryRow("SELECT photo FROM users WHERE id=?", userid).Scan(&photo)
-	return photo, err
 }
 
 func (db *appdbimpl) SearchUser(search_username string) ([]User, error) {
@@ -488,7 +511,10 @@ func (db *appdbimpl) SearchUser(search_username string) ([]User, error) {
 		return nil, err
 	}
 	var users []User
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
 	for rows.Next() {
 		var id int
 		var username string

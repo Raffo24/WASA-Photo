@@ -32,7 +32,6 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.DELETE("/photos/:id/like/:userId", rt.unlikePhotoHandler)
 	rt.router.DELETE("/comments/:commentId", rt.deleteCommentHandler)
 	// Special routes
-	//context?
-	//rt.router.GET("/context", rt.wrap(rt.getContextReply))
+	rt.router.GET("/context", rt.wrap(rt.getContextReply))
 	return rt.router
 }
