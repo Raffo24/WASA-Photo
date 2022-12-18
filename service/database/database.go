@@ -34,11 +34,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
+// TODO sostituisci questo deleted con un okay generico
 const DELETED = "DELETED"
 
 // User struct
@@ -105,6 +107,8 @@ type AppDatabase interface {
 	AddPhoto(id int, photourl string) (Photo, error)
 	SearchUser(username string) ([]User, error)
 	GetCommentByID(id int) (Comment, error)
+	UserIsPresent(id int) (bool, error)
+	UserIsBanned(bannerID int, bannedID int) (bool, error)
 }
 
 type appdbimpl struct {
@@ -137,7 +141,7 @@ func createTables(db *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS photos (
 			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			userid INTEGER NOT NULL,
-			photourl varchar(100) NOT NULL,
+			photourl varchar(1000) NOT NULL,
 			createdat DATETIME DEFAULT CURRENT_TIMESTAMP,
 			foreign key (userid) references users(id)
 		);
@@ -171,6 +175,57 @@ func createTables(db *sql.DB) error {
 			foreign key (bannedId) references users(id),
 			foreign key (bannerId) references users(id)
 		);
+
+		CREATE TRIGGER IF NOT EXISTS delete_photos_on_user_delete
+		AFTER DELETE ON users
+		BEGIN
+			DELETE FROM photos WHERE userid = OLD.id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS delete_comments_on_user_delete
+		AFTER DELETE ON users
+		BEGIN
+			DELETE FROM comments WHERE userid = OLD.id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS delete_likes_on_user_delete
+		AFTER DELETE ON users
+		BEGIN
+			DELETE FROM likes WHERE userid = OLD.id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS delete_follows_on_user_delete
+		AFTER DELETE ON users
+		BEGIN
+			DELETE FROM follows WHERE followerid = OLD.id;
+			DELETE FROM follows WHERE followingid = OLD.id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS delete_bans_on_user_delete
+		AFTER DELETE ON users
+		BEGIN
+			DELETE FROM bans WHERE bannedid = OLD.id;
+			DELETE FROM bans WHERE bannerid = OLD.id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS delete_comments_on_photo_delete
+		AFTER DELETE ON photos
+		BEGIN
+			DELETE FROM comments WHERE photoid = OLD.id;
+		END;
+			
+		CREATE TRIGGER IF NOT EXISTS delete_likes_on_photo_delete
+		AFTER DELETE ON photos
+		BEGIN
+			DELETE FROM likes WHERE photoid = OLD.id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS unfollow_on_ban
+		AFTER INSERT ON bans
+		BEGIN
+			DELETE FROM follows WHERE followerid = NEW.bannedid;
+			DELETE FROM follows WHERE followingid = NEW.bannedid;
+		END;
 	`)
 	return err
 }
@@ -348,7 +403,7 @@ func (db *appdbimpl) GetBansID(userID int) ([]int, error) {
 }
 
 func (db *appdbimpl) GetFeed(userID int) ([]Photo, error) {
-	rows, err := db.c.Query("SELECT id, userid, photo, createdat FROM photos WHERE userid IN (SELECT followingid FROM follows WHERE followerid=?);", userID)
+	rows, err := db.c.Query("SELECT id, userid, photourl, createdat FROM photos WHERE userid IN (SELECT followingid FROM follows WHERE followerid=?);", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -460,12 +515,39 @@ func (db *appdbimpl) AddBan(bannedID int, bannerID int) (Ban, error) {
 }
 
 func (db *appdbimpl) DeleteUser(id int) (string, error) {
-	_, err := db.c.Exec("DELETE FROM users WHERE id=?", id)
+	flag, err := db.UserIsPresent(id)
+	if err != nil {
+		logrus.Error(err)
+	}
+	if !flag {
+		return "", errors.New("USER NOT FOUND")
+	}
+	//delete all photos
+	photos, err := db.GetPhotos(id)
+	if err == nil {
+		for idx := range photos {
+			photo, err := db.GetPhoto(photos[idx].ID)
+			if err != nil {
+				logrus.Error(err)
+			}
+			if os.Remove(photo.Photourl) != nil {
+				logrus.Error("IMAGE NOT found")
+			}
+		}
+	}
+	_, err = db.c.Exec("DELETE FROM users WHERE id=?", id)
 	return DELETED, err
 }
 
 func (db *appdbimpl) DeletePhoto(id int) (string, error) {
-	_, err := db.c.Exec("DELETE FROM photos WHERE id=?", id)
+	photo, err := db.GetPhoto(id)
+	if err != nil {
+		return "", err
+	}
+	if os.Remove(photo.Photourl) != nil {
+		return "", errors.New("IMAGE NOT found")
+	}
+	_, err = db.c.Exec("DELETE FROM photos WHERE id=?", id)
 	return DELETED, err
 }
 
@@ -534,4 +616,16 @@ func (db *appdbimpl) GetCommentByID(id int) (Comment, error) {
 	var comment Comment
 	err := db.c.QueryRow("SELECT id, photoid, userid, comment, createdat FROM comments WHERE id=?", id).Scan(&comment.ID, &comment.PhotoID, &comment.UserID, &comment.Content, &comment.CreatedAt)
 	return comment, err
+}
+
+func (db *appdbimpl) UserIsPresent(id int) (bool, error) {
+	var count int
+	err := db.c.QueryRow("SELECT COUNT(*) FROM users WHERE id=?", id).Scan(&count)
+	return count > 0, err
+}
+
+func (db *appdbimpl) UserIsBanned(idBanner int, idBanned int) (bool, error) {
+	var count int
+	err := db.c.QueryRow("SELECT COUNT(*) FROM bans WHERE bannerid=? AND bannedid=?", idBanner, idBanned).Scan(&count)
+	return count > 0, err
 }

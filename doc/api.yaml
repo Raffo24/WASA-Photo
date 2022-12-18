@@ -200,6 +200,39 @@ paths:
               application/json:
                 schema:
                   $ref: "#/components/schemas/Error"
+      delete:
+        tags:
+          - user info
+        summary: Delete User
+        description: Delete a user
+        operationId: deleteUser
+        security:
+          - bearerAuth: []
+        responses:
+          201:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          400:
+            description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          404:
+            description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          500:
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
     /users/{id}/follow/{followId}:
       parameters:
         - name: id

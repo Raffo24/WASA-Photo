@@ -25,13 +25,15 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/photos/:id/comments", rt.getAllCommentsHandler)
 	rt.router.GET("/comments/:commentId", rt.getCommentHandler)
 	rt.router.GET("/liveness", rt.liveness)
+	rt.router.GET("/context", rt.wrap(rt.getContextReply))
+
 	// DELETE REQUEST
+	rt.router.DELETE("/users/:id", rt.deleteUserHandler)
 	rt.router.DELETE("/users/:id/follow/:followId", rt.unfollowUserHandler)
 	rt.router.DELETE("/users/:id/ban/:banId", rt.unbanUserHandler)
 	rt.router.DELETE("/photos/:id", rt.deletePhotoHandler)
 	rt.router.DELETE("/photos/:id/like/:userId", rt.unlikePhotoHandler)
 	rt.router.DELETE("/comments/:commentId", rt.deleteCommentHandler)
 	// Special routes
-	rt.router.GET("/context", rt.wrap(rt.getContextReply))
 	return rt.router
 }
