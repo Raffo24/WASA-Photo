@@ -339,7 +339,7 @@ paths:
             pattern: "[A-Za-z0-9]*"
             minLength: 5
             maxLength: 5
-      post:
+      put:
         tags:
           - social network
         summary: Ban User
@@ -626,7 +626,7 @@ paths:
             minLength: 5
             maxLength: 5
           required: true
-      post:
+      put:
         tags:
           - photos
         summary: Like Photo
@@ -777,15 +777,6 @@ paths:
                   $ref: "#/components/schemas/Error"
     /comments/{commentId}:
       parameters:
-        - name: photoId
-          in: path
-          description: id of the photo that needs to be fetched
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
         - name: commentId
           in: path
           description: id of the comment that needs to be fetched
@@ -865,9 +856,29 @@ paths:
       get:
         tags:
           - status
-        summary: Get API Status
-        description: Get API Status
-        operationId: getApiStatus
+        summary: API live
+        description: API live
+        operationId: IsApiLive
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ApiStatus"
+          500:
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    /context:
+      get:
+        tags:
+          - status
+        summary: API context
+        description: API context
+        operationId: GetApiContext
         responses:
           200:
             description: Successful operation
