@@ -20,10 +20,11 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/feed", rt.getFeedHandler)
 	rt.router.GET("/users/:id", rt.getUserHandler)
 	rt.router.GET("/users/:id/photos", rt.getUserPhotosHandler)
-	rt.router.GET("/users/:id/search", rt.searchUserHandler)
+	rt.router.GET("/users/:id/following", rt.getFollowingHandler)
+	rt.router.GET("/users/:id/followers", rt.getFollowersHandler)
+	rt.router.GET("/users", rt.searchUserHandler)
 	rt.router.GET("/photos/:id", rt.getPhotoHandler)
 	rt.router.GET("/photos/:id/comments", rt.getAllCommentsHandler)
-	rt.router.GET("/comments/:commentId", rt.getCommentHandler)
 	rt.router.GET("/liveness", rt.liveness)
 	rt.router.GET("/context", rt.wrap(rt.getContextReply))
 

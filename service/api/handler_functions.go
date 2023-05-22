@@ -38,13 +38,8 @@ func finalize(output interface{}, err error, w http.ResponseWriter) {
 		logerr(w.Write([]byte(err.Error())))
 	}
 }
-func (rt *_router) youAreNotAuthorized(r *http.Request, w http.ResponseWriter) (bool, int) {
+func (rt *_router) youAreLogged(r *http.Request, w http.ResponseWriter) (bool, int) {
 	myID, err := strconv.Atoi(strings.Split(r.Header.Get("Authorization"), " ")[1])
-	if err != nil {
-		w.WriteHeader(400)
-		logerr(w.Write([]byte("Non sei loggato")))
-		return true, 0
-	}
 	if err != nil {
 		w.WriteHeader(400)
 		logerr(w.Write([]byte("Non sei loggato")))
@@ -74,7 +69,7 @@ func (rt *_router) youAreBanned(myID int, banner int, r *http.Request, w http.Re
 	return bool
 }
 func (rt *_router) securityChecker(bannerID int, r *http.Request, w http.ResponseWriter) bool {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return true
 	}
@@ -105,7 +100,7 @@ func (rt *_router) getUserHandler(w http.ResponseWriter, r *http.Request, ps htt
 	if rt.securityChecker(userID, r, w) {
 		return
 	}
-	user, err := rt.db.GetUserByID(userID)
+	user, err := rt.db.GetUserExtendedByID(userID)
 	finalize(user, err, w)
 }
 func (rt *_router) getUserPhotosHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -121,14 +116,42 @@ func (rt *_router) getUserPhotosHandler(w http.ResponseWriter, r *http.Request, 
 	output, err := rt.db.GetPhotos(userID)
 	finalize(output, err, w)
 }
+func (rt *_router) getFollowersHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	userID, err := strconv.Atoi(ps.ByName("id"))
+	if err != nil {
+		w.WriteHeader(400)
+		logerr(w.Write([]byte("id is empty")))
+		return
+	}
+	if rt.securityChecker(userID, r, w) {
+		return
+	}
+	output, err := rt.db.GetFollowersID(userID)
+	finalize(output, err, w)
+}
+
+func (rt *_router) getFollowingHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	userID, err := strconv.Atoi(ps.ByName("id"))
+	if err != nil {
+		w.WriteHeader(400)
+		logerr(w.Write([]byte("id is empty")))
+		return
+	}
+	if rt.securityChecker(userID, r, w) {
+		return
+	}
+	output, err := rt.db.GetFollowingID(userID)
+	finalize(output, err, w)
+}
 
 func (rt *_router) searchUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	username_searched := ps.ByName("id")
+	// read params query
+	username_searched := r.URL.Query().Get("query")
 	output, err := rt.db.SearchUser(username_searched)
 	finalize(output, err, w)
 }
 func (rt *_router) getFeedHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, userID := rt.youAreNotAuthorized(r, w)
+	flag, userID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -154,33 +177,35 @@ func (rt *_router) getPhotoHandler(w http.ResponseWriter, r *http.Request, ps ht
 	}
 	// read photo from disk
 
-	bytePhoto, err := os.ReadFile(photo.Photourl)
+	file, err := os.Open(photo.Photourl)
 	if err != nil {
 		w.WriteHeader(400)
 		logerr(w.Write([]byte("photo not found on disk")))
 		return
 	}
-	w.Header().Set("Content-Type", "image/jpeg")
-	w.Header().Set("Content-Length", strconv.Itoa(len(bytePhoto)))
-	w.Write(bytePhoto)
-}
-
-func (rt *_router) getCommentHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, _ := rt.youAreNotAuthorized(r, w)
-	if flag {
-		return
-	}
-	commentID, err := strconv.Atoi(ps.ByName("commentId"))
+	fi, err := file.Stat()
 	if err != nil {
 		w.WriteHeader(400)
-		logerr(w.Write([]byte("comment id is empty")))
+		logerr(w.Write([]byte("error reading stat of photo")))
 		return
 	}
-	comment, err := rt.db.GetCommentByID(commentID)
-	finalize(comment, err, w)
+	defer file.Close()
+
+	// write form-data to response with these field : BytePhoto, description, title
+	w.Header().Set("Content-Disposition", "attachment; filename="+photo.Title)
+	w.Header().Set("Filename", photo.Title)
+	w.Header().Set("Description", photo.Description)
+	w.Header().Set("CreatedAt", photo.CreatedAt.String())
+	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Length", strconv.Itoa(int(fi.Size())))
+	if _, err := io.Copy(w, file); err != nil {
+		w.WriteHeader(400)
+		logerr(w.Write([]byte("error writing photo to response")))
+		return
+	}
 }
 func (rt *_router) getAllCommentsHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, _ := rt.youAreNotAuthorized(r, w)
+	flag, _ := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -220,7 +245,7 @@ func (rt *_router) loginHandler(w http.ResponseWriter, r *http.Request, ps httpr
 }
 
 func (rt *_router) changeMyNameHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -245,22 +270,30 @@ func (rt *_router) changeMyNameHandler(w http.ResponseWriter, r *http.Request, p
 	finalize(output, err, w)
 }
 func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, userID := rt.youAreNotAuthorized(r, w)
+	flag, userID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
-	buf := make([]byte, r.ContentLength)
-	if len(buf) == 0 {
-		http.Error(w, "photo is empty", http.StatusBadRequest)
+	// send a form multipart with 3 fields: title, description, photo(jpeg)
+	// read the form
+	err := r.ParseMultipartForm(100)
+	if err != nil {
+		w.WriteHeader(400)
+		logerr(w.Write([]byte("error parsing form")))
 		return
 	}
-	// Legge l'intero contenuto del corpo della richiesta in una variabile di tipo []byte
-	data, err := readAll(r.Body)
+	// read the fields
+	title := r.FormValue("title")
+	description := r.FormValue("description")
+	// write the file
+	file, _, err := r.FormFile("photo")
 	if err != nil {
 		w.WriteHeader(400)
 		logerr(w.Write([]byte("error reading photo")))
 		return
 	}
+	defer file.Close()
+	// store uploaded file into local path
 	imageUrl := "service/api/images/" + strconv.Itoa(userID) + "_" + strconv.Itoa(int(time.Now().Unix())) + ".jpg"
 	f, err := os.Create(imageUrl)
 	if err != nil {
@@ -269,12 +302,15 @@ func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 	defer f.Close()
-	if _, err := f.Write(data); err != nil {
+
+	// copy the uploaded file into the local filesystem
+	_, err = io.Copy(f, file)
+	if err != nil {
 		w.WriteHeader(400)
-		logerr(w.Write([]byte("error writing to file")))
+		logerr(w.Write([]byte("error copy file")))
 		return
 	}
-	output, err := rt.db.AddPhoto(userID, imageUrl)
+	output, err := rt.db.AddPhoto(userID, imageUrl, title, description)
 	finalize(output, err, w)
 }
 func readAll(r io.Reader) ([]byte, error) {
@@ -287,7 +323,7 @@ func readAll(r io.Reader) ([]byte, error) {
 }
 
 func (rt *_router) addCommentHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, userID := rt.youAreNotAuthorized(r, w)
+	flag, userID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -309,7 +345,7 @@ func (rt *_router) addCommentHandler(w http.ResponseWriter, r *http.Request, ps 
 
 // PUT REQUEST
 func (rt *_router) likePhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -334,7 +370,7 @@ func (rt *_router) likePhotoHandler(w http.ResponseWriter, r *http.Request, ps h
 	finalize(output, err, w)
 }
 func (rt *_router) followUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -365,7 +401,7 @@ func (rt *_router) followUserHandler(w http.ResponseWriter, r *http.Request, ps 
 }
 
 func (rt *_router) banUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -392,7 +428,7 @@ func (rt *_router) banUserHandler(w http.ResponseWriter, r *http.Request, ps htt
 
 // DELETE REQUEST
 func (rt *_router) deleteUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -412,7 +448,7 @@ func (rt *_router) deleteUserHandler(w http.ResponseWriter, r *http.Request, ps 
 }
 
 func (rt *_router) deleteCommentHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -437,7 +473,7 @@ func (rt *_router) deleteCommentHandler(w http.ResponseWriter, r *http.Request, 
 	finalize(output, err, w)
 }
 func (rt *_router) deletePhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -462,7 +498,7 @@ func (rt *_router) deletePhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	finalize(output, err, w)
 }
 func (rt *_router) unlikePhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -487,7 +523,7 @@ func (rt *_router) unlikePhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	finalize(output, err, w)
 }
 func (rt *_router) unfollowUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -513,7 +549,7 @@ func (rt *_router) unfollowUserHandler(w http.ResponseWriter, r *http.Request, p
 }
 
 func (rt *_router) unbanUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, myID := rt.youAreNotAuthorized(r, w)
+	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}

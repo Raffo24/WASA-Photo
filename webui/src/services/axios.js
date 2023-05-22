@@ -2,7 +2,20 @@ import axios from "axios";
 
 const instance = axios.create({
 	baseURL: __API_URL__,
-	timeout: 1000 * 5
+	timeout: 1000 * 50
 });
 
-export default instance;
+const axiosUpdate = () => {
+	instance.defaults.headers.common['Authorization'] = 'Bearer ' + getCurrentSession();
+}
+function getCurrentSession() {
+	if (localStorage.getItem('token') == null){
+        return sessionStorage.getItem('token');
+    }
+    return localStorage.getItem('token');
+}
+export {
+	instance as axios,
+	axiosUpdate as axiosUpdate,
+	getCurrentSession as getCurrentSession
+}

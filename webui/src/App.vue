@@ -1,67 +1,84 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-</script>
 <script>
-export default {}
+export default {
+	props: ["user_id", "name", "date", "comments", "likes", "photo_id", "liked"],
+	data: function () {
+		return {
+			modalTitle: "Modal Title",
+			modalMsg: "Modal Message",
+
+			logged_in: true,
+		}
+	},
+	methods: {
+
+		showModal(title, message) {
+			this.modalTitle = title
+			this.modalMsg = message
+
+			this.$refs.errModal.showModal()
+		},
+
+		setLoggedIn() {
+			this.logged_in = true
+		},
+
+		logout() {
+			localStorage.removeItem("token")
+            sessionStorage.removeItem("token")
+			this.logged_in = false
+            this.$router.push({ path: "/login" })
+		}
+	},
+
+	mounted() {
+		this.$axiosUpdate()
+
+		this.$axios.interceptors.response.use(response => {
+			return response;
+		}, error => {
+			if (error.response.status != 0) {
+				if (error.response.status === 401) {
+					this.$router.push({ path: '/login' })
+					this.logged_in = false;
+					return;
+				}
+				
+				this.showModal("Error " + error.response.status, error.response.data['status'])
+				return;
+			}
+			this.showModal("Error", error.toString());
+			return;
+		});
+	}
+}
 </script>
 
 <template>
+	<body style="background-color: #161819">
+		<Modal ref="errModal" id="errorModal" :title="modalTitle">
+			{{ modalMsg }} caiaa
+		</Modal>
+		<div class="container-fluid" id="app">
+			<div class="row">
+				<main>
+					<RouterView />
+					<div v-if="logged_in" class="mb-5 pb-3"></div>
+				</main>
 
-	<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-		<a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#/">Example App</a>
-		<button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-	</header>
-
-	<div class="container-fluid">
-		<div class="row">
-			<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-				<div class="position-sticky pt-3 sidebar-sticky">
-					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>General</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink to="/" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
-								Home
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link1" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#layout"/></svg>
-								Menu item 1
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link2" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#key"/></svg>
-								Menu item 2
-							</RouterLink>
-						</li>
-					</ul>
-
-					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>Secondary menu</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink :to="'/some/' + 'variable_here' + '/path'" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
-								Item 1
-							</RouterLink>
-						</li>
-					</ul>
-				</div>
-			</nav>
-
-			<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-				<RouterView />
-			</main>
+				<!-- Navigation bar -->
+				<nav v-if="logged_in" id="global-nav" class="navbar fixed-bottom navbar-expand-lg navbar-dark bg-dark"> 
+					<div class="collapse navbar-collapse" id="navbarNav"></div>
+					<RouterLink to="/" class="col-4 text-center">
+						<i class="bi bi-house text-light" style="font-size: 2em"></i>
+					</RouterLink>
+					<RouterLink to="/search" class="col-4 text-center">
+						<i class="bi bi-search text-light" style="font-size: 2em"></i>
+					</RouterLink>
+					<RouterLink to="/users/me" class="col-4 text-center">
+						<i class="bi bi-person text-light" style="font-size: 2em"></i>
+					</RouterLink>
+				</nav>
+			</div>
 		</div>
-	</div>
+	</body>
 </template>
-
-<style>
-</style>

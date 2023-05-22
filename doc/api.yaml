@@ -97,7 +97,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Photo"
+                  $ref: "#/components/schemas/Photos"
           400:
             description: Invalid User
             content:
@@ -215,6 +215,94 @@ paths:
               application/json:
                 schema:
                   $ref: "#/components/schemas/User"
+          400:
+            description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          404:
+            description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          500:
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    /users/{id}/followers:
+      parameters:
+        - name: id
+          in: path
+          description: id of the user that needs to be fetched
+          required: true
+          schema:
+            type: string
+            minLength: 5
+            maxLength: 5
+            pattern: "[A-Za-z0-9]*"
+      get:
+        tags:
+          - social network
+        summary: Get User Followers
+        description: Get a user followers
+        operationId: getUserFollowers
+        security:
+          - bearerAuth: []
+        responses:
+          201:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Users"
+          400:
+            description: Invalid id supplied
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          404:
+            description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+          500:
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    /users/{id}/following:
+      parameters:
+        - name: id
+          in: path
+          description: id of the user that needs to be fetched
+          required: true
+          schema:
+            type: string
+            minLength: 5
+            maxLength: 5
+            pattern: "[A-Za-z0-9]*"
+      get:
+        tags:
+          - social network
+        summary: Get User Following
+        description: Get a user following
+        operationId: getUserFollowing
+        security:
+          - bearerAuth: []
+        responses:
+          201:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Users"
           400:
             description: Invalid id supplied
             content:
@@ -430,7 +518,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Photo"
+                  $ref: "#/components/schemas/Photos"
           400:
             description: Invalid id supplied
             content:
@@ -472,7 +560,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/User"
+                  $ref: "#/components/schemas/Users"
           400:
             description: Invalid username supplied
             content:
@@ -502,7 +590,7 @@ paths:
           content:
             multipart/form-data:
               schema:
-                $ref: "#/components/schemas/Photo"
+                $ref: "#/components/schemas/Photos"
           required: true
         security:
           - bearerAuth: []
@@ -937,10 +1025,18 @@ components:
           maxLength: 300
           description: Description of the photo
           example: "The photo description"
+        date:
+          type: string
+          pattern: ".*"
+          minLength: 1
+          maxLength: 40
+          description: Date of the photo
+          example: "2022-12-23T00:37:52Z"
       example:
         id: "12345"
         title: "The photo title"
         description: "The photo description"
+        date: "2022-12-23T00:37:52Z"
     Comment:
       type: object
       description: comment of the photo
@@ -985,6 +1081,38 @@ components:
           value:
             id: "12345"
             username: "Maria"
+    Photos:
+      type: array
+      description: list of photos
+      items:
+        $ref: "#/components/schemas/Photo"
+      example:
+        - id: "12345"
+          title: "The photo title"
+          description: "The photo description"
+        - id: "12346"
+          title: "The photo title"
+          description: "The photo description"
+    Comments:
+      type: array
+      description: list of comments
+      items:
+        $ref: "#/components/schemas/Comment"
+      example:
+        - id: "12345"
+          text: "The comment text"
+        - id: "12346"
+          text: "The comment text"
+    Users:
+      type: array
+      description: list of users
+      items:
+        $ref: "#/components/schemas/User"
+      example:
+        - id: "12345"
+          username: "Maria"
+        - id: "12346"
+          username: "Maria"
     Token:
       description: Token data
       type: object
