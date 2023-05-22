@@ -58,14 +58,14 @@ export default {
     <div class="vh-100 container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                <div class="card" style="border-radius: 1rem">
+                <div class="card bg-dark text-white" style="border-radius: 1rem">
                     <div class="card-body p-4">
 
                         <h1 class="h2 pb-4 text-center">WASAPhoto</h1>
 
                         <form>
                             <div class="form-floating mb-4">
-                                <input v-model="field_username" type="email" id="formUsername" class="form-control"
+                                <input v-model="field_username" type="email" id="formUsername" class="form-control bg-dark text-white"
                                     placeholder="name@example.com" />
                                 <label class="form-label" for="formUsername">Username</label>
                             </div>
@@ -83,11 +83,10 @@ export default {
                             </div>
 
                             <!-- Submit button -->
-                            <button style="width: 100%" type="button" class="btn btn-primary btn-block mb-4"
+                            <button style="width: 100%" type="button" class="btn btn-outline-primary btn-block mb-4"
                                 @click="login">Sign in</button>
                             <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
                             <LoadingSpinner :loading="loading" />
-                            <i class="text-center text-secondary d-flex flex-column">share your special moments!</i>
                         </form>
                     </div>
                 </div>
