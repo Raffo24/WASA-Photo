@@ -1,4 +1,3 @@
-#wasaphoto# WASA-Photo
 # WASA-Photo
 Progetto del corso di "Programmazione per il web", La Sapienza Università Di Roma.
 <br>
