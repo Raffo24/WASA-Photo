@@ -6,7 +6,7 @@ log:
   methodname: false
   json: false
   destination: stderr
-  file: C:/wasa/debug.log
+  file: /tmp/debug.log
   combinedtostdout: true
 web:
   apihost: 0.0.0.0:3000
