@@ -49,6 +49,13 @@ type User struct {
 	Username string
 }
 
+type UserBanFollow struct {
+	ID       int
+	Username string
+	Followed bool
+	Banned   bool
+}
+
 type UserExtended struct {
 	ID        int
 	Username  string
@@ -122,7 +129,7 @@ type AppDatabase interface {
 	DeleteBan(bannedID int, bannerID int) (string, error)
 	UpdateUser(id int, username string) (User, error)
 	AddPhoto(id int, photourl string, title string, description string) (Photo, error)
-	SearchUser(username string) ([]User, error)
+	SearchUser(username string, UserID int) ([]UserBanFollow, error)
 	GetCommentByID(id int) (Comment, error)
 	UserIsPresent(id int) (bool, error)
 	UserIsBanned(bannerID int, bannedID int) (bool, error)
@@ -713,12 +720,12 @@ func (db *appdbimpl) UpdateUser(id int, username string) (User, error) {
 	return user, err
 }
 
-func (db *appdbimpl) SearchUser(search_username string) ([]User, error) {
+func (db *appdbimpl) SearchUser(search_username string, userID int) ([]UserBanFollow, error) {
 	rows, err := db.c.Query("SELECT id, username FROM users WHERE username LIKE ?", "%"+search_username+"%")
 	if err != nil {
 		return nil, err
 	}
-	var users []User
+	var users []UserBanFollow
 	defer func() {
 		_ = rows.Close()
 		_ = rows.Err() // or modify return value
@@ -726,13 +733,27 @@ func (db *appdbimpl) SearchUser(search_username string) ([]User, error) {
 	for rows.Next() {
 		var id int
 		var username string
+		var banned bool
+		var followed bool
 		err = rows.Scan(&id, &username)
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, User{
+
+		banned, err := db.UserIsBanned(userID, id)
+		if err != nil {
+			return nil, err
+		}
+		db.c.QueryRow("SELECT COUNT(*) FROM follows WHERE followerid=? AND followingid=?", userID, id).Scan(&followed)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, UserBanFollow{
 			ID:       id,
 			Username: username,
+			Banned:   banned,
+			Followed: followed,
 		})
 	}
 	return users, nil

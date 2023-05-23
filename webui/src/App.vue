@@ -56,7 +56,7 @@ export default {
 <template>
 	<body style="background-color: #161819">
 		<Modal ref="errModal" id="errorModal" :title="modalTitle">
-			{{ modalMsg }} caiaa
+			{{ modalMsg }}
 		</Modal>
 		<div class="container-fluid" id="app">
 			<div class="row">

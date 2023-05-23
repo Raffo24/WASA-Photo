@@ -50,9 +50,12 @@ export default {
 		async loadContent() {
 			this.loading = true;
 			let response = await this.$axios.get("/users/" + this.requestedProfile + "/photos")
-			if (response == null) return
-
-			this.stream_data = this.stream_data.concat(response.data)
+			if (response == null) {
+				this.loading = false
+				this.loadingError = true
+				return
+			}
+			this.stream_data = response.data
 			this.loading = false
 		},
 	},

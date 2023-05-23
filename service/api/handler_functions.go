@@ -146,8 +146,12 @@ func (rt *_router) getFollowingHandler(w http.ResponseWriter, r *http.Request, p
 
 func (rt *_router) searchUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// read params query
+	flag, userID := rt.youAreLogged(r, w)
+	if flag {
+		return
+	}
 	username_searched := r.URL.Query().Get("query")
-	output, err := rt.db.SearchUser(username_searched)
+	output, err := rt.db.SearchUser(username_searched, userID)
 	finalize(output, err, w)
 }
 func (rt *_router) getFeedHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

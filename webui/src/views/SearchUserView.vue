@@ -23,15 +23,13 @@ export default {
 				this.loading = false;
 				return;
 			}
-
 			let response = await this.$axios.get("/users?query=" + this.fieldUsername);
-
 			if (response == null) {
 				this.loading = false
 				return
 			}
 
-			else this.streamData = this.streamData.concat(response.data);
+			else this.streamData = response.data;
 			this.loading = false;
 		}
 
@@ -40,7 +38,6 @@ export default {
 </script>
 
 <template>
-	<boby >
 	<div class="mt-4" style="height:100vh">
 		<div class="container">
 			<div class="row justify-content-md-center text-white">
@@ -50,12 +47,12 @@ export default {
 					<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
 					<div class="form-floating mb-4">
-						<input v-model="fieldUsername" @input="query" id="formUsername" class="form-control bg-dark"
+						<input v-model="fieldUsername" @input="query" id="formUsername" class="form-control bg-dark text-white"
 							placeholder="name@example.com" />
 						<label class="form-label" for="formUsername">Cerca</label>
 					</div>
 
-					<div id="main-content" v-for="item of streamData" v-bind:key="item.user_id">
+					<div id="main-content" v-for="item of this.streamData" v-bind:key="item.ID">
 						<!-- User card -->
 						<UserCard :user_id="item.ID" :name="item.Username" :followed="item.Followed" :banned="item.Banned" />
 					</div>
@@ -67,5 +64,4 @@ export default {
 		</div>
 
 	</div>
-	</boby>
 </template>

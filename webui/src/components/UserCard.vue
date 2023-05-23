@@ -115,25 +115,41 @@ export default {
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <div class="card-body h-100" style="justify-content: center; align-items: center; display: flex;">
+                    <div class="card-body h-100" :style="{
+                                            'justify-content': (this.user_data ? 'center' : 'space-between'),
+                                            'align-items': (this.user_data ? 'center' : 'start'),
+                                            'display': 'flex'
+                                            }">
                         <a @click="visit">
                             <h5 class="card-title mb-0 d-inline-block" style="cursor: pointer">
                                 {{ username }} 
                             </h5>
                         </a>
+                        
+                        <div class="d-flex flex-column" v-if="!(user_data)">
+                            <div v-if="!myself" class="d-flex">
+                                <button v-if="!user_banned" @click="ban" type="button"
+                                    class="btn btn-outline-danger me-2">Ban</button>
+                                <button v-if="user_banned" @click="unban" type="button"
+                                    class="btn btn-outline-danger me-2">Banned</button>
+                                <button v-if="!user_followed" @click="follow" type="button"
+                                    class="btn btn-outline-primary">Follow</button>
+                                <button v-if="user_followed" @click="unfollow" type="button"
+                                    class="btn btn-outline-primary">Following</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-12">
+                <div class="col-12" v-if="(user_data)">
                     <ProfileCounters :user_data="user_data" />
                 </div>
-                <div class="d-flex flex-column" v-bind:class="{
+                <div class="d-flex flex-column" v-if="(user_data)" v-bind:class="{
                                                 'col-12': (myself && show_new_post),
-                                                'col-sm-12': (myself && show_new_post),
+                                                'col-sm:12': (myself && show_new_post),
                                                 'col-12': !(myself && show_new_post),
                                                 'align-items-center': !(myself && show_new_post),
                                                 'align-items-sm-center': (myself && show_new_post),
                                             }">
-
                     <!-- Buttons -->
                     <div class="card-body d-flex" >
                         <div v-if="!myself" class="d-flex">

@@ -52,20 +52,20 @@ export default {
 
         <!-- Photos -->
         <div class="col-4" style="color: white">
-            <small>{{ user_data["Photos"] }}</small><br>
-            <small>Photos</small>
+            <h5>{{ user_data["Photos"] }}</h5>
+            <h6>Photos</h6>
         </div>
 
         <!-- Followers -->
         <div class="col-4" @click="loadData('followers')" style="cursor: pointer; color: white">
-            <small>{{ user_data["Followers"] }}</small><br>
-            <small>Followers</small>
+            <h5>{{ user_data["Followers"] }}</h5>
+            <h6>Followers</h6>
         </div>
 
         <!-- Following -->
         <div class="col-4" @click="loadData('following')" style="cursor: pointer; color: white">
-            <small>{{ user_data["Following"] }}</small><br>
-            <small>Following</small>
+            <h5>{{ user_data["Following"] }}</h5>
+            <h6>Following</h6>
         </div>
     </div>
 </template>
