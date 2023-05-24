@@ -161,6 +161,16 @@ func New(db *sql.DB) (AppDatabase, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error creating database structure: %w", err)
 	}
+	// crea la cartella per le foto se non esiste
+	_, err = os.Stat("./service/api/images/")
+	if os.IsNotExist(err) {
+		errDir := os.MkdirAll("./service/api/images/", 0755)
+		if errDir != nil {
+			logrus.WithError(err).Error("error creating photos folder")
+			return nil, fmt.Errorf("error creating photos folder: %w", err)
+		}
+	}
+
 	return &appdbimpl{
 		c: db,
 	}, nil
@@ -369,6 +379,9 @@ func (db *appdbimpl) GetPhotos(userID int) ([]Photo, error) {
 func (db *appdbimpl) GetPhoto(photoID int) (Photo, error) {
 	var photo Photo
 	err := db.c.QueryRow("SELECT id, userid, photourl, title, description, createdat FROM photos WHERE id=?", photoID).Scan(&photo.ID, &photo.UserID, &photo.Photourl, &photo.Title, &photo.Description, &photo.CreatedAt)
+	if err != nil {
+		return Photo{}, err
+	}
 	return photo, err
 }
 func (db *appdbimpl) GetCommentsByPhotoID(photoID int) ([]Comment, error) {
@@ -565,6 +578,9 @@ func (db *appdbimpl) GetFeed(userID int) ([]Photo, error) {
 func (db *appdbimpl) GetUserByID(id int) (User, error) {
 	var user User
 	err := db.c.QueryRow("SELECT id, username FROM users WHERE id=?", id).Scan(&user.ID, &user.Username)
+	if err != nil {
+		return User{}, err
+	}
 	return user, err
 }
 func (db *appdbimpl) GetUserExtendedByID(id int) (UserExtended, error) {
@@ -598,6 +614,9 @@ func (db *appdbimpl) GetUserExtendedByID(id int) (UserExtended, error) {
 func (db *appdbimpl) GetUserByUsername(username string) (User, error) {
 	var user User
 	err := db.c.QueryRow("SELECT id, username FROM users WHERE username=?", username).Scan(&user.ID, &user.Username)
+	if err != nil {
+		return User{}, err
+	}
 	return user, err
 }
 
@@ -788,17 +807,26 @@ func (db *appdbimpl) SearchUser(search_username string, userID int) ([]UserBanFo
 func (db *appdbimpl) GetCommentByID(id int) (Comment, error) {
 	var comment Comment
 	err := db.c.QueryRow("SELECT id, photoid, userid, comment, createdat FROM comments WHERE id=?", id).Scan(&comment.ID, &comment.PhotoID, &comment.UserID, &comment.Content, &comment.CreatedAt)
+	if err != nil {
+		return Comment{}, err
+	}
 	return comment, err
 }
 
 func (db *appdbimpl) UserIsPresent(id int) (bool, error) {
 	var count int
 	err := db.c.QueryRow("SELECT COUNT(*) FROM users WHERE id=?", id).Scan(&count)
+	if err != nil {
+		return false, err
+	}
 	return count > 0, err
 }
 
 func (db *appdbimpl) UserIsBanned(idBanner int, idBanned int) (bool, error) {
 	var count int
 	err := db.c.QueryRow("SELECT COUNT(*) FROM bans WHERE bannerid=? AND bannedid=?", idBanner, idBanned).Scan(&count)
+	if err != nil {
+		return false, err
+	}
 	return count > 0, err
 }

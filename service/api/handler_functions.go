@@ -52,8 +52,8 @@ func (rt *_router) youAreLogged(r *http.Request, w http.ResponseWriter) (bool, i
 		return true, 0
 	}
 	if !bool {
-		w.WriteHeader(404)
-		logerr(w.Write([]byte("utente non presente")))
+		w.WriteHeader(401)
+		logerr(w.Write([]byte("non sei loggato")))
 		return true, 0
 	}
 	return false, myID
