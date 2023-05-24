@@ -17,16 +17,12 @@ paths:
           it will be created and
           an identification token will be returned
           if the user exist, the user identifier will be returned
-      operationId: do_login
+      operationId: create_or_login_user
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                  example: raffaele
+              $ref: "#/components/schemas/user_name"
       responses:
         '200':
           description: login effettuato
@@ -35,57 +31,72 @@ paths:
               schema:
                 $ref: "#/components/schemas/mini_user_object"
               examples:
-                /session:
+                OK:
                   value:
-                    id: 5
+                    id: 1
+        '201':
+          description: utente creato
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/mini_user_object"
+              examples:
+                OK:
+                  value:
+                    id: 1
         '400':
           description: errore login
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: |
-                    EOF
+                error:
+                  value:
+                    status: "Id non valido"
   /photos:
     post:
       tags:
       - photos
       summary: Upload photo
       description: Upload a new photo
-      operationId: upload_photo
+      operationId: create_photo
       requestBody:
         content:
           multipart/form-data:
             schema:
               $ref: "#/components/schemas/photo_object"
-
       responses:
-        '200':
+        '201':
           description: upload effettuato
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/photo_object_extended"
               examples:
-                /photos:
+                photos:
                   value:
-                    comments: 0
-                    created_at: 2023-05-23T18:36:02Z
-                    description: hey
-                    id: 29
-                    liked: false
-                    likes: 0
-                    photo_url: service/api/images/1_1684866962.jpg
-                    title: ciaoo
-                    user_id: 1
-                    user_name: ''
+                    photo:
+                      comments: 0
+                      created_at: 2023-05-23T18:36:02Z
+                      description: hey
+                      id: 29
+                      liked: false
+                      likes: 0
+                      photo_url: service/api/images/1_1684866962.jpg
+                      title: ciaoo
+                      user_id: 1
+                      user_name: ''
         '400':
           description: errore upload
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request 2:
-                  value: utente non presente
+                error:
+                  value:
+                    status: "Id non valido"
   /photos/{id}/comments:
     parameters:
       - name: id
@@ -101,7 +112,7 @@ paths:
       description: Get comments for a photo
       operationId: get_photo_comments
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: commento inserito
@@ -110,68 +121,69 @@ paths:
               schema:
                 $ref: "#/components/schemas/json_comments_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                  - content: ma che bella foto!
-                    created_at: 2023-05-21T13:38:50Z
-                    id: 3
-                    photo_id: 1
-                    user_id: 1
-                    user_name: Raffaele
-                  - content: ciao
-                    created_at: 2023-05-21T22:02:19Z
-                    id: 10
-                    photo_id: 1
-                    user_id: 1
-                    user_name: Raffaele
+                    comments:
+                    - content: ma che bella foto!
+                      created_at: 2023-05-21T13:38:50Z
+                      id: 3
+                      photo_id: 1
+                      user_id: 1
+                      user_name: Raffaele
+                    - content: ciao
+                      created_at: 2023-05-21T22:02:19Z
+                      id: 10
+                      photo_id: 1
+                      user_id: 1
+                      user_name: Raffaele
         '400':
-          description: 400 Bad Request
+          description: Bad_Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                error:
+                  value:
+                    status: "id non valido"
     post:
       tags:
       - photos
       summary: Post photo Comment
       description: Post a comment for a photo
-      operationId: comment_photo
+      operationId: create_comment
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                content:
-                  type: string
-                  example: ma che bella foto!
-            example:
-              content: ma che bella foto!
+              $ref : "#/components/schemas/mini_comment_object"
       responses:
-        '200':
+        '201':
           description: commento inserito
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/json_comments_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                    content: ma che bella foto!
-                    created_at: 0001-01-01T00:00:00Z
-                    id: 38
-                    photo_id: 1
-                    user_id: 1
-                    user_name: ''
+                    comment:
+                      content: ma che bella foto!
+                      created_at: 0001-01-01T00:00:00Z
+                      id: 38
+                      photo_id: 1
+                      user_id: 1
+                      user_name: ''
         '400':
-          description: 400 Bad Request
+          description: Bad_Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: |
-                    EOF
+                error:
+                  value:
+                    status: "id foto non valido"
 
   /users/{id}/follow/{followid}:
     parameters:
@@ -192,9 +204,9 @@ paths:
       - social_network
       summary: Follow User
       description: Follow a user
-      operationId: follow_user
+      operationId: add_follow_user
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: utente seguito
@@ -203,54 +215,70 @@ paths:
               schema:
                 $ref: "#/components/schemas/follow_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                    follower_id: 1
-                    following_id: 2
+                    follow_object :
+                      follower_id: 1
+                      following_id: 2
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 bad request:
-                  value: Non puoi seguire 2 volte lo stesso utente
+                error:
+                  value:
+                    status: Non puoi seguire 2 volte lo stesso utente
         '401':
           description: Unauthorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi seguire utilizzando un altro utente
+                error:
+                  value:
+                    status: Non puoi seguire utilizzando un altro utente
     delete:
       tags:
         - social_network
       summary: Unfollow User
       description: Unfollow a user
-      operationId: unfollow_user
+      operationId: delete_follow_user
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: utente con id {id} non segue più l'utente con id {followid}
           content:
             application/octet-stream:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                200 OK:
-                  value: '"DELETED"'
+                OK:
+                  value:
+                    status: DELETED
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                error:
+                  value:
+                    status: utente non presente
         '401':
           description: Unauthorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi smettere di seguire da un account che non ti appartiene
+                error:
+                  value:
+                    status: Non puoi smettere di seguire da un account che non ti appartiene
 
   /photos/{id}/like/{user_id}:
     parameters:
@@ -271,9 +299,9 @@ paths:
         - photos
       summary: Like photo
       description: Like a photo
-      operationId: like_photo
+      operationId: add_like_photo
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: like inserito
@@ -282,55 +310,51 @@ paths:
               schema:
                 $ref: "#/components/schemas/like_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                    photo_id: 29
-                    user_id: 1
+                    like_object:
+                      photo_id: 29
+                      user_id: 1
+                    
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: Non puoi mettere like 2 volte alla stessa foto
+                error:
+                  value:
+                    status: Non puoi mettere like 2 volte alla stessa foto
     delete:
       tags:
         - photos
       summary: Unlike photo
       description: Unlike a photo
-      operationId: unlike_photo
+      operationId: delete_like_photo
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: l'utente con id {user_id} ha tolto il like alla foto con id {id}
           content:
-            application/octet-stream:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                200 OK:
-                  value: '"DELETED"'
+                error:
+                  value:
+                    status: DELETED
         '401':
           description: Unauthorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi levare un like che non hai messo tu
-  /:
-    get:
-      tags:
-      - status
-      summary: Get the API status
-      description: Get the API status
-      operationId: get_api_status
-      responses:
-        '200':
-          description: OK
-          content:
-            application/octet-stream:
-              examples:
-                /:
-                  value: '"l''api sta funzionando correttamente"'
+                error:
+                  value:
+                    status: Non puoi levare un like che non hai messo tu
   /users/{id}/followers:
     parameters:
       - name: id
@@ -346,7 +370,7 @@ paths:
       description: Get a user followers
       operationId: get_user_followers
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: utenti che seguono l'utente scelto
@@ -355,17 +379,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/mini_user_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                  - id: 1
-                    user_name: Raffaele
+                    mini_user_object:
+                      - id: 1
+                        user_name: Raffaele
         '400':
-          description: 400 Bad Request
+          description: Bad_Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                error:
+                  value:
+                    status: utente non presente
   /users/{id}/following:
     parameters:
       - name: id
@@ -381,7 +409,7 @@ paths:
       description: Get a user following
       operationId: get_user_following
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: utenti che seguono l'utente scelto
@@ -390,17 +418,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/mini_user_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                  - id: 2
-                    user_name: Giuseppe
+                    mini_user_object:
+                      - id: 1
+                        user_name: Raffaele
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                error:
+                  value:
+                    status: utente non presente
   /feed:
     get:
       tags:
@@ -409,7 +441,7 @@ paths:
       description: Get the feed_stream of the user
       operationId: get_my_stream
       security:
-      - bearerAuth: []
+      - BearerAuth: []
       responses:
         '200':
           description: /feed
@@ -418,25 +450,29 @@ paths:
               schema:
                 $ref: "#/components/schemas/photo_object"
               examples:
-                /feed:
+                OK:
                   value:
-                  - comments: 9
-                    created_at: 2023-05-19T11:36:18Z
-                    description: Splash
-                    id: 1
-                    liked: false
-                    likes: 1
-                    photo_url: service/api/images/2_1684496178.jpg
-                    title: Parrot
-                    user_id: 2
-                    user_name: Raffaele
+                    photo_object:
+                      - comments: 9
+                        created_at: 2023-05-19T11:36:18Z
+                        description: Splash
+                        id: 1
+                        liked: false
+                        likes: 1
+                        photo_url: service/api/images/2_1684496178.jpg
+                        title: Parrot
+                        user_id: 2
+                        user_name: Raffaele 
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                error:
+                  value:
+                    status: utente non presente
   /users/{id}:
     parameters:
       - name: id
@@ -452,7 +488,7 @@ paths:
       description: Get a user profile
       operationId: get_user_profile
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: dati utente
@@ -461,21 +497,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/user_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                    banned: 0
-                    followers: 0
-                    following: 0
-                    id: 4
-                    photos: 0
-                    user_name: Ciao
+                    user_object:
+                      banned: 0
+                      followers: 0
+                      following: 0
+                      id: 4
+                      photos: 0
+                      user_name: Raffaele
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: L'utente con quell'id non esiste
+                error:
+                  value:
+                    status: L'utente con quell'id non esiste
     delete:
       tags:
         - user_info
@@ -483,85 +523,102 @@ paths:
       description: Delete a user
       operationId: delete_user
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: utente eliminato
           content:
-            application/octet-stream:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                200 OK:
-                  value: '"DELETED"'
+                error:
+                  value:
+                    status: DELETED
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                error:
+                  value:
+                    status: utente non presente
         '401':
           description: Unauthorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi cancellare un utente che non ti appartiene
+                error:
+                  value:
+                    status: Non puoi cancellare un utente che non ti appartiene
     put:
       tags:
         - user_info
       summary: Update user_name
       description: Update my user_name
-      operationId: set_my_user_name
+      operationId: replace_my_user_name
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                user_name:
-                  type: string
-                  example: Raffaele
-            example:
-              user_name: Raffaele
+              $ref: "#/components/schemas/user_name"
+            examples:
+              user_name:
+                value:
+                  user_name: Raffaele
       responses:
-        '200':
+        '201':
           description: nome utente modificato
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/user_object"
+                $ref: "#/components/schemas/mini_user_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                    id: 2
-                    user_name: Raffaele
+                    mini_user_object:
+                    - id: 2
+                      user_name: Raffaele
         '400':
-          description: 400 Bad Request
+          description: Bad_Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: |
-                    EOF
+                error:
+                  value:
+                    status: id non valido
         '401':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi cambiare il nome di un altro utente
+                error:
+                  value:
+                    status: Non puoi cambiare il nome di un altro utente
   /users:
     get:
       tags:
       - user_management
       summary: Search User
       description: Search a user by user_name
-      operationId: get_my_user_name
+      operationId: list_username
       parameters:
       - name: query
+        description: stringa da cercare
         in: query
         schema:
           type: string
+          minLength: 0
+          maxLength: 20
+          pattern: ^[a-zA-Z0-9_]*$
           example: nome
       responses:
         '200':
@@ -571,27 +628,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/json_of_users"
               examples:
-                /users/search?query=raff:
+                OK:
                   value:
-                  - banned: false
-                    followed: false
-                    id: 1
-                    user_name: Raffaele
-                  - banned: false
-                    followed: false
-                    id: 3
-                    user_name: raffaelea
-                  - banned: true
-                    followed: false
-                    id: 11
-                    user_name: raffa
+                    json_of_users:
+                    - banned: false
+                      followed: false
+                      id: 1
+                      user_name: Raffaele
+                    - banned: false
+                      followed: false
+                      id: 3
+                      user_name: raffaelea
+                    - banned: true
+                      followed: false
+                      id: 11
+                      user_name: pippo
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                Bad_Request:
+                  value: 
+                    status: utente non presente
   /photos/{id}:
     parameters:
       - name: id
@@ -607,7 +668,7 @@ paths:
       description: Get a photo
       operationId: get_photo
       security:
-      - bearerAuth: []
+      - BearerAuth: []
       responses:
         '200':
           description: dati foto
@@ -617,13 +678,19 @@ paths:
                   type: string
                   format: binary
                   description: image in PNG format
+                  pattern: "((.|\n)*)"
+                  minLength: 1
+                  maxLength: 10485760
         '400':
           description: Invalid id supplied
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                Bad_Request:
+                  value: 
+                    status: utente non presente
     delete:
       tags:
         - photos
@@ -631,29 +698,38 @@ paths:
       description: Delete a photo
       operationId: delete_photo
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: la foto con id {id} è stata eliminata
           content:
             application/octet-stream:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                200 OK:
-                  value: '"DELETED"'
+                OK:
+                  value: 
+                    status: DELETED
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: photo not found
+                Bad_Request:
+                  value: 
+                    status : photo not found
         '401':
           description: Unauthorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi cancellare una foto che non ti appartiene
+                Unauthorized:
+                  value:
+                    status: Non puoi cancellare una foto che non ti appartiene
   /users/{id}/photos:
     parameters:
       - name: id
@@ -669,7 +745,7 @@ paths:
       description: Get a user photos
       operationId: get_user_photos
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: Lista di foto postate dall'utente con id passato
@@ -678,35 +754,39 @@ paths:
               schema:
                 $ref: "#/components/schemas/json_of_photo_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                  - comments: 2
-                    created_at: 2023-05-19T12:34:43Z
-                    description: Splash
-                    id: 2
-                    liked: true
-                    likes: 2
-                    photo_url: service/api/images/1_1684499683.jpg
-                    title: Parrot
-                    user_id: 1
-                    user_name: Raffaele
-                  - comments: 0
-                    created_at: 2023-05-22T14:05:02Z
-                    description: CyberPunk2077
-                    id: 24
-                    liked: false
-                    likes: 0
-                    photo_url: service/api/images/1_1684764302.jpg
-                    title: Lucy
-                    user_id: 1
-                    user_name: Raffaele
+                    json_of_photo_object:
+                    - comments: 2
+                      created_at: 2023-05-19T12:34:43Z
+                      description: Splash
+                      id: 2
+                      liked: true
+                      likes: 2
+                      photo_url: service/api/images/1_1684499683.jpg
+                      title: Parrot
+                      user_id: 1
+                      user_name: Raffaele
+                    - comments: 0
+                      created_at: 2023-05-22T14:05:02Z
+                      description: CyberPunk2077
+                      id: 24
+                      liked: false
+                      likes: 0
+                      photo_url: service/api/images/1_1684764302.jpg
+                      title: Lucy
+                      user_id: 1
+                      user_name: Raffaele
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                Bad_Request:
+                  value:
+                    status: utente non presente
   
   /users/{id}/ban/{banid}:
     parameters:
@@ -727,7 +807,7 @@ paths:
         - social_network
       summary: Ban User
       description: Ban a user
-      operationId: ban_user
+      operationId: add_ban
       responses:
         '200':
           description: utente bannato
@@ -736,54 +816,80 @@ paths:
               schema:
                 $ref: "#/components/schemas/banner_object"
               examples:
-                200 OK:
+                OK:
                   value:
-                    banned_id: 3
-                    banner_id: 2
+                    ban_object:
+                      banned_id: 3
+                      banner_id: 2
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: Non puoi bannare 2 volte lo stesso utente
+                Bad_Request:
+                  value: 
+                    status: Non puoi bannare 2 volte lo stesso utente
         '401':
           description: Unathorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unathorized:
-                  value: Non puoi bannare utilizzando un altro utente
+                Unathorized:
+                  value: 
+                    status: Non puoi bannare utilizzando un altro utente
     delete:
       tags:
         - social_network 
       summary: Unban User
       description: Unban a user
-      operationId: unban_user
+      operationId: delete_ban
       security:
-        - bearerAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: l'utente con id {id} ha bannato l'utente con id {banid}
           content:
             application/octet-stream:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                200 OK:
-                  value: '"DELETED"'
+                OK:
+                  value: 
+                    status: DELETED
         '400':
           description: Bad Request
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: utente non presente
+                error:
+                  value:
+                    status: Non puoi sbannare 2 volte lo stesso utente
         '401':
           description: Unauthorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi sbannare da un account che non ti appartiene
+                Unauthorized:
+                  value: 
+                    status: Non puoi sbannare da un account che non ti appartiene
+        '404':
+          description: Utente non trovato
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                error:
+                  value:
+                    status: "Utente non trovato"
   
   /comments/{id}:
     parameters:
@@ -798,31 +904,50 @@ paths:
       - photos
       summary: Delete photo Comment
       description: Delete a comment for a photo
-      operationId: uncomment_photo
+      operationId: delete_comment
       security:
-      - bearerAuth: []
+      - BearerAuth: []
       responses:
         '200':
           description: il commento con id {id} è stato eliminato
           content:
             application/octet-stream:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                200 OK:
-                  value: '"DELETED"'
-        '400':
-          description: Bad Request
+                OK:
+                  value: 
+                    status: DELETED
+        '404':
+          description: Commento non trovato
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                400 Bad Request:
-                  value: comment not found
+                error:
+                  value:
+                    status: "Commento non trovato"
         '401':
           description: Unauthorized
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
               examples:
-                401 Unauthorized:
-                  value: Non puoi cancellare un commento che non ti appartiene
+                Unauthorized:
+                  value: 
+                    status: Non puoi cancellare un commento che non ti appartiene
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                error:
+                  value:
+                    status: "id non valido"
 tags:
 - name: user_management
   description: "Operations related to username"
@@ -846,156 +971,289 @@ components:
       description: The photo.
       properties:
         description:
+          description: The description of the photo.
           type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: Splash
         photo:
+          description: The photo itself.
           type: string
           format: binary
+          minLength: 1
+          maxLength: 10485760
+          pattern: "((.|\n)*)"
         title:
+          description: The title of the photo.
           type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: Parrot
     photo_object_extended:
       type: object
+      description: The photo with all datas.
       properties:
         comments:
+          description: The number of comments.
           type: number
           example: 0
         created_at:
+          description: The date of creation.
           type: string
+          format: date-time
+          minLength: 20
+          maxLength: 20
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
           example: 2023-05-23T18:36:02Z
         description:
+          description: The description of the photo.
           type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: hey
         id:
+          description: The id of the photo.
           type: number
           example: 29
         liked:
+          description: If the user liked the photo.
           type: boolean
           example: false
         likes:
+          description: The number of likes.
           type: number
           example: 0
         photo_url:
+          description: The url of the photo.
           type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_./]*$"
           example: service/api/images/1_1684866962.jpg
         title:
+          description: The title of the photo.
           type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: ciaoo
         user_id:
+          description: The id of the user.
           type: number
           example: 1
         user_name:
+          description: The name of the user.
           type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: 'Raffaele'
     mini_user_object:
       type: object
+      description: The user with few datas.
       properties:
         id:
+          description: The id of the user.
           type: number
           example: 1
         name:
+          description: The name of the user.
           type: string
+          minLength: 1
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: 'Raffaele'
     user_object:
       type: object
+      description: The user standard.
       properties:
         banned:
+          description: If the user is banned.
           type: number
           example: 0
         followers:
+          description: The number of followers.
           type: number
           example: 0
         following:
+          description: The number of following.
           type: number
           example: 0
         id:
+          description: The id of the user.
           type: number
           example: 4
         photos:
+          description: The number of photos.
           type: number
           example: 0
         user_name:
+          description: The name of the user.
           type: string
+          minLength: 1
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: Ciao
     follow_object:
+      description: The follow object.
       properties:
         follower_id:
+          description: The id of the follower.
           type: number
           example: 1
         following_id:
+          description: The id of the following.
           type: number
           example: 2
     banner_object:
+      description: The banner object.
       properties:
         banner_id:
+          description: The id of the banner.
           type: number
           example: 1
         banned_id:
+          description: The id of the banned.
           type: number
           example: 2
     like_object:
+      description: The like object.
       type: object
       properties:
         photo_id:
+          description: The id of the photo.
           type: number
           example: 29
         user_id:
+          description: The id of the user.
           type: number
           example: 1
     json_comments_object:
+      description: The json that contains an array of comments
       type: object
       properties:
-        items:
+        comments:
+          description: The array of comments.
           type: array
           items:
-            type: object
-            properties:
-              content:
-                type: string
-                example: ma che bella foto!
-              created_at:
-                type: string
-                example: 2023-05-21T13:38:50Z
-              id:
-                type: number
-                example: 3
-              photo_id:
-                type: number
-                example: 1
-              user_id:
-                type: number
-                example: 1
-              user_name:
-                type: string
-                example: Raffaele
+            $ref: '#/components/schemas/comment_object'
+          minItems: 1
+          maxItems: 100
     user_object_only_ban_follow:
       type: object
+      description: The user with only ban and follow.
       properties:
         banned:
+          description: If the user is banned.
           type: boolean
           example: false
         followed:
+          description: If the user is followed.
           type: boolean
           example: false
         id:
+          description: The id of the user.
           type: number
           example: 1
         user_name:
+          description: The name of the user.
           type: string
+          minLength: 1
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
           example: Raffaele
-    json_of_photo_object:
+    user_name:
+      description: The user name.
       type: object
       properties:
-        items:
+        user_name:
+          description: The name of the user.
+          type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
+          example: Raffaele
+    mini_comment_object:
+      description: The simple comment object.
+      type: object
+      properties:
+        content:
+          description: The content of the comment.
+          type: string
+          minLength: 0
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
+          example: ma che bella foto!
+    comment_object:
+      type: object
+      properties:
+        content:
+          description: The content of the comment.
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
+          example: ma che bella foto!
+        created_at:
+          description: The date of creation.
+          type: string
+          minLength: 20
+          maxLength: 20
+          format: date-time
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+          example: 2023-05-21T13:38:50Z
+        id:
+          description: The id of the comment.
+          type: number
+          example: 3
+        photo_id:
+          description: The id of the photo.
+          type: number
+          example: 1
+        user_id:
+          description: The id of the user.
+          type: number
+          example: 1
+        user_name:
+          description: The name of the user.
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9_ !]*$"
+          example: Raffaele
+    json_of_photo_object:
+      description: The json that contains an array of photos
+      type: object
+      properties:
+        photos:
           type: array
           items:
             $ref: "#/components/schemas/photo_object"
           description: An array of photos.
+          minItems: 0
+          maxItems: 100
     json_of_users:
+      description: The json that contains an array of users
       type: object
       properties:
-        items:
+        users:
           type: array
           items:
             $ref: "#/components/schemas/user_object_only_ban_follow"
           description: An array of users.
+          minItems: 0
+          maxItems: 100 
+    generic_response:
+      type: object
+      description: An object representing a responce status.
+      properties:
+        status:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ".*"
+          description: The status of the request.
+          example: "Success"
