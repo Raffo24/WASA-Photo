@@ -1,1129 +1,1001 @@
 openapi: 3.0.3
 info:
-  title: WASAPhoto API
-  description: This is the API documentation for the WASAPhoto application
-  version: 1.0.0
-tags:
-  - name: "API management"
-    description: "API management"
-  - name: "user management"
-    description: "user management"
-  - name: "feed stream"
-    description: "feed stream"
-  - name: user info
-    description: user info
-  - name: social network
-    description: social network
-  - name: photos
-    description: photos
-servers:
-  - url: http://localhost:8080
-    description: Local Server
+  title: WASAphoto
+  description: |-
+    This is the API documentation for the WASAphoto application
+  version: "3.0"
+servers :
+  - url: http://localhost:3000
+    description: Development server
 paths:
-    /session:
-      post:
-        tags:
-          - user management
-        summary: Logs in the user
-        description: If the user not exist,
+  /session:
+    post:
+      tags:
+      - user_management
+      summary: Login
+      description: If the user not exist,
           it will be created and
           an identification token will be returned
           if the user exist, the user identifier will be returned
-        operationId: doLogin
-        requestBody:
-          description: User details
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-          required: true
-        responses:
-          201:
-            description: User log-in action successful
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Token"
-          400:  
-            description: Invalid username/password supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /feed:
-      get:
-        tags:
-          - feed stream
-        summary: Get feed stream
-        description: Get the feed stream of the user
-        operationId: getMyStream
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Photos"
-          400:
-            description: Invalid User
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /users/{id}:
-      parameters:
-        - name: id
-          in: path
-          description: id of the user that needs to be fetched
-          required: true
-          schema:
-            type: string
-            minLength: 5
-            maxLength: 5
-            pattern: "[A-Za-z0-9]*"
-      get:
-        tags:
-          - user info
-        summary: Get User Profile
-        description: Get a user profile
-        operationId: getUserProfile
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/User"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      put:
-        tags:
-          - user info
-        summary: Update Username
-        description: Update my username
-        operationId: setMyUserName
-        requestBody:
-          description: Username
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-          required: true
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/User"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      delete:
-        tags:
-          - user info
-        summary: Delete User
-        description: Delete a user
-        operationId: deleteUser
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/User"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /users/{id}/followers:
-      parameters:
-        - name: id
-          in: path
-          description: id of the user that needs to be fetched
-          required: true
-          schema:
-            type: string
-            minLength: 5
-            maxLength: 5
-            pattern: "[A-Za-z0-9]*"
-      get:
-        tags:
-          - social network
-        summary: Get User Followers
-        description: Get a user followers
-        operationId: getUserFollowers
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Users"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /users/{id}/following:
-      parameters:
-        - name: id
-          in: path
-          description: id of the user that needs to be fetched
-          required: true
-          schema:
-            type: string
-            minLength: 5
-            maxLength: 5
-            pattern: "[A-Za-z0-9]*"
-      get:
-        tags:
-          - social network
-        summary: Get User Following
-        description: Get a user following
-        operationId: getUserFollowing
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Users"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /users/{id}/follow/{followId}:
-      parameters:
-        - name: id
-          in: path
-          description: id of the user that needs to be followed
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-        - name: followId
-          in: path
-          description: id of the user that needs to be followed
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-      put:
-        tags:
-          - social network
-        summary: Follow User
-        description: Follow a user
-        operationId: followUser
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/User"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      delete:
-        tags:
-          - social network
-        summary: Unfollow User
-        description: Unfollow a user
-        operationId: unfollowUser
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/User"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /users/{id}/ban/{banId}:
-      parameters:
-        - name: id
-          in: path
-          description: id that wants to ban another user
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-        - name: banId
-          in: path
-          description: id of the user that needs to be banned
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-      put:
-        tags:
-          - social network
-        summary: Ban User
-        description: Ban a user
-        operationId: banUser
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/User"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      delete:
-        tags:
-          - social network 
-        summary: Unban User
-        description: Unban a user
-        operationId: unbanUser
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/User"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /users/{id}/photos:
-      parameters:
-        - name: id
-          in: path
-          description: id of the user that needs to be fetched
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-      get:
-        tags:
-          - user info
-        summary: Get User Photos
-        description: Get a user photos
-        operationId: getUserPhotos
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Photos"
-          400:
-            description: Invalid id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /users/{username}/search:
-      get:
-        tags:
-          - user management
-        summary: Search User
-        description: Search a user by username
-        operationId: getMyUserName
-        parameters:
-          - name: username
-            in: path
-            description: username of the user that needs to be fetched
-            required: true
+      operationId: do_login
+      requestBody:
+        content:
+          application/json:
             schema:
-              type: string
-              pattern: "[A-Za-z0-9]*"
-              minLength: 5
-              maxLength: 5
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Users"
-          400:
-            description: Invalid username supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /photos:
-      post:
-        tags:
-          - photos
-        summary: Upload Photo
-        description: Upload a new photo
-        operationId: uploadPhoto
-        requestBody:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: raffaele
+      responses:
+        '200':
+          description: login effettuato
           content:
-            multipart/form-data:
+            application/json:
               schema:
-                $ref: "#/components/schemas/Photos"
-          required: true
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Photo"
-          400:
-            description: Invalid photo
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/mini_user_object"
+              examples:
+                /session:
+                  value:
+                    id: 5
+        '400':
+          description: errore login
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: |
+                    EOF
+  /photos:
+    post:
+      tags:
+      - photos
+      summary: Upload photo
+      description: Upload a new photo
+      operationId: upload_photo
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/photo_object"
 
-    /photos/{id}:
+      responses:
+        '200':
+          description: upload effettuato
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/photo_object_extended"
+              examples:
+                /photos:
+                  value:
+                    comments: 0
+                    created_at: 2023-05-23T18:36:02Z
+                    description: hey
+                    id: 29
+                    liked: false
+                    likes: 0
+                    photo_url: service/api/images/1_1684866962.jpg
+                    title: ciaoo
+                    user_id: 1
+                    user_name: ''
+        '400':
+          description: errore upload
+          content:
+            text/plain:
+              examples:
+                400 Bad Request 2:
+                  value: utente non presente
+  /photos/{id}/comments:
+    parameters:
+      - name: id
+        in: path
+        description: id of the photo that needs to be fetched
+        schema:
+          type: integer
+        required: true
+    get:
+      tags:
+        - photos
+      summary: Get photo comments
+      description: Get comments for a photo
+      operationId: get_photo_comments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: commento inserito
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/json_comments_object"
+              examples:
+                200 OK:
+                  value:
+                  - content: ma che bella foto!
+                    created_at: 2023-05-21T13:38:50Z
+                    id: 3
+                    photo_id: 1
+                    user_id: 1
+                    user_name: Raffaele
+                  - content: ciao
+                    created_at: 2023-05-21T22:02:19Z
+                    id: 10
+                    photo_id: 1
+                    user_id: 1
+                    user_name: Raffaele
+        '400':
+          description: 400 Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+    post:
+      tags:
+      - photos
+      summary: Post photo Comment
+      description: Post a comment for a photo
+      operationId: comment_photo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: ma che bella foto!
+            example:
+              content: ma che bella foto!
+      responses:
+        '200':
+          description: commento inserito
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/json_comments_object"
+              examples:
+                200 OK:
+                  value:
+                    content: ma che bella foto!
+                    created_at: 0001-01-01T00:00:00Z
+                    id: 38
+                    photo_id: 1
+                    user_id: 1
+                    user_name: ''
+        '400':
+          description: 400 Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: |
+                    EOF
+
+  /users/{id}/follow/{followid}:
+    parameters:
+      - name: id
+        in: path
+        description: id of the user that needs to be followed
+        schema:
+          type: integer
+        required: true
+      - name: followid
+        in: path
+        description: id of the user that needs to be followed
+        schema:
+          type: integer
+        required: true
+    put:
+      tags:
+      - social_network
+      summary: Follow User
+      description: Follow a user
+      operationId: follow_user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: utente seguito
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/follow_object"
+              examples:
+                200 OK:
+                  value:
+                    follower_id: 1
+                    following_id: 2
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 bad request:
+                  value: Non puoi seguire 2 volte lo stesso utente
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi seguire utilizzando un altro utente
+    delete:
+      tags:
+        - social_network
+      summary: Unfollow User
+      description: Unfollow a user
+      operationId: unfollow_user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: utente con id {id} non segue più l'utente con id {followid}
+          content:
+            application/octet-stream:
+              examples:
+                200 OK:
+                  value: '"DELETED"'
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi smettere di seguire da un account che non ti appartiene
+
+  /photos/{id}/like/{user_id}:
+    parameters:
+      - name: id
+        in: path
+        description: id of the photo that needs to be liked
+        schema:
+          type: integer
+        required: true
+      - name: user_id
+        in: path
+        description: id of the user that needs to like the photo
+        schema:
+          type: integer
+        required: true
+    put:
+      tags:
+        - photos
+      summary: Like photo
+      description: Like a photo
+      operationId: like_photo
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: like inserito
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/like_object"
+              examples:
+                200 OK:
+                  value:
+                    photo_id: 29
+                    user_id: 1
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: Non puoi mettere like 2 volte alla stessa foto
+    delete:
+      tags:
+        - photos
+      summary: Unlike photo
+      description: Unlike a photo
+      operationId: unlike_photo
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: l'utente con id {user_id} ha tolto il like alla foto con id {id}
+          content:
+            application/octet-stream:
+              examples:
+                200 OK:
+                  value: '"DELETED"'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi levare un like che non hai messo tu
+  /:
+    get:
+      tags:
+      - status
+      summary: Get the API status
+      description: Get the API status
+      operationId: get_api_status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              examples:
+                /:
+                  value: '"l''api sta funzionando correttamente"'
+  /users/{id}/followers:
+    parameters:
+      - name: id
+        in: path
+        description: id of the user that needs to be fetched
+        schema:
+          type: integer
+        required: true
+    get:
+      tags:
+      - social_network
+      summary: Get User followers
+      description: Get a user followers
+      operationId: get_user_followers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: utenti che seguono l'utente scelto
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/mini_user_object"
+              examples:
+                200 OK:
+                  value:
+                  - id: 1
+                    user_name: Raffaele
+        '400':
+          description: 400 Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+  /users/{id}/following:
+    parameters:
+      - name: id
+        in: path
+        description: id of the user that needs to be fetched
+        schema:
+          type: integer
+        required: true
+    get:
+      tags:
+        - social_network
+      summary: Get User following
+      description: Get a user following
+      operationId: get_user_following
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: utenti che seguono l'utente scelto
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/mini_user_object"
+              examples:
+                200 OK:
+                  value:
+                  - id: 2
+                    user_name: Giuseppe
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+  /feed:
+    get:
+      tags:
+      - feed_stream
+      summary: Get feed_stream
+      description: Get the feed_stream of the user
+      operationId: get_my_stream
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: /feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/photo_object"
+              examples:
+                /feed:
+                  value:
+                  - comments: 9
+                    created_at: 2023-05-19T11:36:18Z
+                    description: Splash
+                    id: 1
+                    liked: false
+                    likes: 1
+                    photo_url: service/api/images/2_1684496178.jpg
+                    title: Parrot
+                    user_id: 2
+                    user_name: Raffaele
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: id of the user that needs to be fetched
+        schema:
+          type: integer
+        required: true
+    get:
+      tags:
+        - user_info
+      summary: Get User Profile
+      description: Get a user profile
+      operationId: get_user_profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: dati utente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_object"
+              examples:
+                200 OK:
+                  value:
+                    banned: 0
+                    followers: 0
+                    following: 0
+                    id: 4
+                    photos: 0
+                    user_name: Ciao
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: L'utente con quell'id non esiste
+    delete:
+      tags:
+        - user_info
+      summary: Delete User
+      description: Delete a user
+      operationId: delete_user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: utente eliminato
+          content:
+            application/octet-stream:
+              examples:
+                200 OK:
+                  value: '"DELETED"'
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi cancellare un utente che non ti appartiene
+    put:
+      tags:
+        - user_info
+      summary: Update user_name
+      description: Update my user_name
+      operationId: set_my_user_name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_name:
+                  type: string
+                  example: Raffaele
+            example:
+              user_name: Raffaele
+      responses:
+        '200':
+          description: nome utente modificato
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_object"
+              examples:
+                200 OK:
+                  value:
+                    id: 2
+                    user_name: Raffaele
+        '400':
+          description: 400 Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: |
+                    EOF
+        '401':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi cambiare il nome di un altro utente
+  /users:
+    get:
+      tags:
+      - user_management
+      summary: Search User
+      description: Search a user by user_name
+      operationId: get_my_user_name
       parameters:
-        - name: id
-          in: path
-          description: ID of the photo that needs to be fetched
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-      get:
-        tags:
-            - photos
-        summary: Get Photo
-        description: Get a photo
-        operationId: getPhoto
-        
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: image in PNG format
-            content:
+      - name: query
+        in: query
+        schema:
+          type: string
+          example: nome
+      responses:
+        '200':
+          description: lista utenti con user_name che contiene la stringa passata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/json_of_users"
+              examples:
+                /users/search?query=raff:
+                  value:
+                  - banned: false
+                    followed: false
+                    id: 1
+                    user_name: Raffaele
+                  - banned: false
+                    followed: false
+                    id: 3
+                    user_name: raffaelea
+                  - banned: true
+                    followed: false
+                    id: 11
+                    user_name: raffa
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+  /photos/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: id of the photo that needs to be fetched
+        schema:
+          type: integer
+        required: true
+    get:
+      tags:
+      - photos
+      summary: Get photo
+      description: Get a photo
+      operationId: get_photo
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: dati foto
+          content:
               image/png:
                 schema:
                   type: string
                   format: binary
                   description: image in PNG format
-          400:
-            description: Invalid photo ID supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      delete:
-        tags:
-          - photos
-        summary: Delete Photo
-        description: Delete a photo
-        operationId: deletePhoto
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Photo"
-          400:
-            description: Invalid photo ID supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /photos/{id}/like/{userId}:
-      parameters:
-        - name: id
-          in: path
-          description: ID of the photo that needs to be liked
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-          required: true
-        - name: userId
-          in: path
-          description: ID of the user that needs to like the photo
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-          required: true
-      put:
-        tags:
-          - photos
-        summary: Like Photo
-        description: Like a photo
-        operationId: likePhoto
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Photo"
-          400:
-            description: Invalid photo id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      delete:
-        tags:
-          - photos
-        summary: Unlike Photo
-        description: Unlike a photo
-        operationId: unlikePhoto
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Photo"
-          400:
-            description: Invalid photo id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /photos/{id}/comments:
-      parameters:
-        - name: id
-          in: path
-          description: id of the photo that needs to be fetched
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-      get:
-        tags:
-          - photos
-        summary: Get Photo Comments
-        description: Get comments for a photo
-        operationId: getPhotoComments
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Comment"
-          400:
-            description: Invalid photo id or comment supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo or comment not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      post:
-        tags:
-          - photos
-        summary: Post Photo Comment
-        description: Post a comment for a photo
-        operationId: commentPhoto
-        requestBody:
-          required: true
+        '400':
+          description: Invalid id supplied
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+    delete:
+      tags:
+        - photos
+      summary: Delete photo
+      description: Delete a photo
+      operationId: delete_photo
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: la foto con id {id} è stata eliminata
+          content:
+            application/octet-stream:
+              examples:
+                200 OK:
+                  value: '"DELETED"'
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: photo not found
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi cancellare una foto che non ti appartiene
+  /users/{id}/photos:
+    parameters:
+      - name: id
+        in: path
+        description: id of the user that needs to be fetched
+        schema:
+          type: integer
+        required: true
+    get:
+      tags:
+        - user_info
+      summary: Get User photos
+      description: Get a user photos
+      operationId: get_user_photos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista di foto postate dall'utente con id passato
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Comment"
-        security:
-          - bearerAuth: []
-        responses:
-          201:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Comment"
-          400:
-            description: Invalid photo id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /comments/{commentId}:
-      parameters:
-        - name: commentId
-          in: path
-          description: id of the comment that needs to be fetched
-          required: true
-          schema:
-            type: string
-            pattern: "[A-Za-z0-9]*"
-            minLength: 5
-            maxLength: 5
-      get:
-        tags:
-          - photos
-        summary: Get Photo Comment
-        description: Get a comment for a photo
-        operationId: getPhotoComment
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Comment"
-          400:
-            description: Invalid photo id supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-      delete:
-        tags:
-          - photos
-        summary: Delete Photo Comment
-        description: Delete a comment for a photo
-        operationId: uncommentPhoto
-        security:
-          - bearerAuth: []
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Comment"
-          400:
-            description: Invalid photoId or commentId supplied
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          404:
-            description: Photo or comment not found
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/json_of_photo_object"
+              examples:
+                200 OK:
+                  value:
+                  - comments: 2
+                    created_at: 2023-05-19T12:34:43Z
+                    description: Splash
+                    id: 2
+                    liked: true
+                    likes: 2
+                    photo_url: service/api/images/1_1684499683.jpg
+                    title: Parrot
+                    user_id: 1
+                    user_name: Raffaele
+                  - comments: 0
+                    created_at: 2023-05-22T14:05:02Z
+                    description: CyberPunk2077
+                    id: 24
+                    liked: false
+                    likes: 0
+                    photo_url: service/api/images/1_1684764302.jpg
+                    title: Lucy
+                    user_id: 1
+                    user_name: Raffaele
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+  
+  /users/{id}/ban/{banid}:
+    parameters:
+    - name: id
+      in: path
+      description: id that wants to ban another user
+      schema:
+        type: integer
+      required: true
+    - name: banid
+      in: path
+      description: id of the user that needs to be banned
+      schema:
+        type: integer
+      required: true
+    put:
+      tags:
+        - social_network
+      summary: Ban User
+      description: Ban a user
+      operationId: ban_user
+      responses:
+        '200':
+          description: utente bannato
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/banner_object"
+              examples:
+                200 OK:
+                  value:
+                    banned_id: 3
+                    banner_id: 2
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: Non puoi bannare 2 volte lo stesso utente
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              examples:
+                401 Unathorized:
+                  value: Non puoi bannare utilizzando un altro utente
+    delete:
+      tags:
+        - social_network 
+      summary: Unban User
+      description: Unban a user
+      operationId: unban_user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: l'utente con id {id} ha bannato l'utente con id {banid}
+          content:
+            application/octet-stream:
+              examples:
+                200 OK:
+                  value: '"DELETED"'
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: utente non presente
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi sbannare da un account che non ti appartiene
+  
+  /comments/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: id of the comment that needs to be fetched
+        schema:
+          type: integer
+        required: true
+    delete:
+      tags:
+      - photos
+      summary: Delete photo Comment
+      description: Delete a comment for a photo
+      operationId: uncomment_photo
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: il commento con id {id} è stato eliminato
+          content:
+            application/octet-stream:
+              examples:
+                200 OK:
+                  value: '"DELETED"'
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              examples:
+                400 Bad Request:
+                  value: comment not found
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              examples:
+                401 Unauthorized:
+                  value: Non puoi cancellare un commento che non ti appartiene
+tags:
+- name: user_management
+  description: "Operations related to username"
+- name: feed_stream
+  description: Operations related to feed_stream
+- name: user_info
+  description: Operations related to user
+- name: social_network
+  description: Operations related to social_network
+- name: photos
+  description: Operations related to photos
+
 components:
   securitySchemes:
-      bearerAuth:
-        type: http
-        scheme: bearer
-        bearerFormat: integer
+    BearerAuth:
+      type: http
+      scheme: bearer
   schemas:
-    ApiStatus:
-      description: API Status
+    photo_object:
       type: object
+      description: The photo.
       properties:
-        status:
-          description: API Status
-          type: string
-          pattern : ".*"
-          minLength: 1
-          maxLength: 40
-          example: "API is up and running"
-      example:
-        status: "API is up and running"
-    Photo:
-      type: object
-      description: photo object
-      properties:
-        id:
-          type: string
-          pattern: "[A-Za-z0-9]*"
-          minLength: 5
-          maxLength: 5
-          description: ID of the photo
-          example: "12131"
-        title:
-          type: string
-          pattern: ".*"
-          minLength: 1
-          maxLength: 40
-          description: Title of the photo
-          example: "The photo title"
         description:
           type: string
-          pattern: ".*"
-          minLength: 0
-          maxLength: 300
-          description: Description of the photo
-          example: "The photo description"
-        date:
+          example: Splash
+        photo:
           type: string
-          pattern: ".*"
-          minLength: 1
-          maxLength: 40
-          description: Date of the photo
-          example: "2022-12-23T00:37:52Z"
-      example:
-        id: "12345"
-        title: "The photo title"
-        description: "The photo description"
-        date: "2022-12-23T00:37:52Z"
-    Comment:
+          format: binary
+        title:
+          type: string
+          example: Parrot
+    photo_object_extended:
       type: object
-      description: comment of the photo
+      properties:
+        comments:
+          type: number
+          example: 0
+        created_at:
+          type: string
+          example: 2023-05-23T18:36:02Z
+        description:
+          type: string
+          example: hey
+        id:
+          type: number
+          example: 29
+        liked:
+          type: boolean
+          example: false
+        likes:
+          type: number
+          example: 0
+        photo_url:
+          type: string
+          example: service/api/images/1_1684866962.jpg
+        title:
+          type: string
+          example: ciaoo
+        user_id:
+          type: number
+          example: 1
+        user_name:
+          type: string
+          example: 'Raffaele'
+    mini_user_object:
+      type: object
       properties:
         id:
+          type: number
+          example: 1
+        name:
           type: string
-          pattern: "[A-Za-z0-9]*"
-          minLength: 5
-          maxLength: 5
-          description: ID of the comment
-          example: "13123"
-        text:
-          type: string
-          pattern: ".*"
-          minLength: 1
-          maxLength: 300
-          description: Text of the comment
-          example: "The comment text"
-      example:
-        id: "12345"
-        text: "The comment text"
-    User:
-      description: user data
+          example: 'Raffaele'
+    user_object:
       type: object
       properties:
+        banned:
+          type: number
+          example: 0
+        followers:
+          type: number
+          example: 0
+        following:
+          type: number
+          example: 0
         id:
+          type: number
+          example: 4
+        photos:
+          type: number
+          example: 0
+        user_name:
           type: string
-          pattern: "[A-Za-z0-9]*"
-          minLength: 5
-          maxLength: 5
-          description: ID of the user
-          example: "32112"
-        username:
-          type: string
-          pattern: "[A-Za-z0-9]*"
-          description: Username of the user
-          example: "Maria"
-          minLength: 3
-          maxLength: 20
-      example:
-        User:
-          value:
-            id: "12345"
-            username: "Maria"
-    Photos:
-      type: array
-      description: list of photos
-      items:
-        $ref: "#/components/schemas/Photo"
-      example:
-        - id: "12345"
-          title: "The photo title"
-          description: "The photo description"
-        - id: "12346"
-          title: "The photo title"
-          description: "The photo description"
-    Comments:
-      type: array
-      description: list of comments
-      items:
-        $ref: "#/components/schemas/Comment"
-      example:
-        - id: "12345"
-          text: "The comment text"
-        - id: "12346"
-          text: "The comment text"
-    Users:
-      type: array
-      description: list of users
-      items:
-        $ref: "#/components/schemas/User"
-      example:
-        - id: "12345"
-          username: "Maria"
-        - id: "12346"
-          username: "Maria"
-    
-    Token:
-      description: Token data
+          example: Ciao
+    follow_object:
+      properties:
+        follower_id:
+          type: number
+          example: 1
+        following_id:
+          type: number
+          example: 2
+    banner_object:
+      properties:
+        banner_id:
+          type: number
+          example: 1
+        banned_id:
+          type: number
+          example: 2
+    like_object:
       type: object
       properties:
-        token:
-          type: string
-          pattern: "[A-Za-z0-9]*"
-          description: Token of the user
-          example: "3211232321"
-          minLength: 3
-          maxLength: 20
-      example:
-        Token:
-          value: "12345wew"
-    Error:
-      description: Error data
+        photo_id:
+          type: number
+          example: 29
+        user_id:
+          type: number
+          example: 1
+    json_comments_object:
       type: object
       properties:
-        trace:
-          type: string
-          pattern: ".*"
-          description: Error trace
-          example: "Invalid photo id supplied"
-          minLength: 1
-          maxLength: 300
-        errors:
-          description: Error messages
+        items:
           type: array
-          minItems: 0
-          maxItems: 10
           items:
-            $ref: "#/components/schemas/ErrorItem"
-      example:
-        Error:
-          value:
-            trace: "Invalid photo id supplied"
-            errors:
-              - code: 400
-                message: "Invalid photo id supplied"
-    ErrorItem:
-      description: Error item data
+            type: object
+            properties:
+              content:
+                type: string
+                example: ma che bella foto!
+              created_at:
+                type: string
+                example: 2023-05-21T13:38:50Z
+              id:
+                type: number
+                example: 3
+              photo_id:
+                type: number
+                example: 1
+              user_id:
+                type: number
+                example: 1
+              user_name:
+                type: string
+                example: Raffaele
+    user_object_only_ban_follow:
       type: object
       properties:
-        more_info:
+        banned:
+          type: boolean
+          example: false
+        followed:
+          type: boolean
+          example: false
+        id:
+          type: number
+          example: 1
+        user_name:
           type: string
-          pattern: ".*"
-          description: More info about the error
-          example: "More info about the error"
-          minLength: 1
-          maxLength: 100
-        code:
-          type: string
-          description: Error code
-          example: "400"
-          enum:
-            - "400"
-            - "401"
-            - "403"
-            - "404"
-            - "500"
-        message:
-          type: string
-          pattern: ".*"
-          description: Error message
-          example: "Invalid photo id supplied"
-          minLength: 1
-          maxLength: 40
-      example:
-        ErrorItem:
-          value:
-            more_info: "More info about the error"
-            code: "400"
-            message: "Invalid photo id supplied"
+          example: Raffaele
+    json_of_photo_object:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/photo_object"
+          description: An array of photos.
+    json_of_users:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/user_object_only_ban_follow"
+          description: An array of users.
