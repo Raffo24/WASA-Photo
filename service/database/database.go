@@ -43,6 +43,11 @@ import (
 // TODO sostituisci questo deleted con un okay generico
 const DELETED = "DELETED"
 
+// Status Object
+type Status struct {
+	Status string
+}
+
 // User struct
 type User struct {
 	ID       int
@@ -124,12 +129,12 @@ type AppDatabase interface {
 	AddLike(photoID int, userID int) (Like, error)
 	AddFollow(followerID int, followingID int) (Follow, error)
 	AddBan(bannedID int, bannerID int) (Ban, error)
-	DeleteUser(id int) (string, error)
-	DeletePhoto(id int) (string, error)
-	DeleteComment(id int) (string, error)
-	DeleteLike(photoID int, userID int) (string, error)
-	DeleteFollow(followerID int, followingID int) (string, error)
-	DeleteBan(bannedID int, bannerID int) (string, error)
+	DeleteUser(id int) (Status, error)
+	DeletePhoto(id int) (Status, error)
+	DeleteComment(id int) (Status, error)
+	DeleteLike(photoID int, userID int) (Status, error)
+	DeleteFollow(followerID int, followingID int) (Status, error)
+	DeleteBan(bannedID int, bannerID int) (Status, error)
 	UpdateUser(id int, username string) (User, error)
 	AddPhoto(id int, photourl string, title string, description string) (Photo, error)
 	SearchUser(username string, UserID int) ([]UserBanFollow, error)
@@ -668,13 +673,13 @@ func (db *appdbimpl) AddBan(bannedID int, bannerID int) (Ban, error) {
 	}, err
 }
 
-func (db *appdbimpl) DeleteUser(id int) (string, error) {
+func (db *appdbimpl) DeleteUser(id int) (Status, error) {
 	flag, err := db.UserIsPresent(id)
 	if err != nil {
 		logrus.Error(err)
 	}
 	if !flag {
-		return "", errors.New("USER NOT FOUND")
+		return Status{}, errors.New("USER NOT FOUND")
 	}
 	// delete all photos
 	photos, err := db.GetPhotos(id)
@@ -690,45 +695,45 @@ func (db *appdbimpl) DeleteUser(id int) (string, error) {
 		}
 	}
 	_, err = db.c.Exec("DELETE FROM users WHERE id=?", id)
-	return DELETED, err
+	return Status{Status: DELETED}, err
 }
 
-func (db *appdbimpl) DeletePhoto(id int) (string, error) {
+func (db *appdbimpl) DeletePhoto(id int) (Status, error) {
 	photo, err := db.GetPhoto(id)
 	if err != nil {
-		return "", err
+		return Status{}, err
 	}
 	if os.Remove(photo.Photourl) != nil {
-		return "", errors.New("IMAGE NOT found")
+		return Status{}, errors.New("IMAGE NOT found")
 	}
 	_, err = db.c.Exec("DELETE FROM photos WHERE id=?", id)
-	return DELETED, err
+	return Status{Status: DELETED}, err
 }
 
-func (db *appdbimpl) DeleteComment(id int) (string, error) {
+func (db *appdbimpl) DeleteComment(id int) (Status, error) {
 	_, err := db.c.Exec("DELETE FROM comments WHERE id=?", id)
-	return DELETED, err
+	return Status{Status: DELETED}, err
 }
 
-func (db *appdbimpl) DeleteLike(photoID int, userID int) (string, error) {
+func (db *appdbimpl) DeleteLike(photoID int, userID int) (Status, error) {
 	_, err := db.c.Exec("DELETE FROM likes WHERE photoid=? AND userid=?", photoID, userID)
-	return DELETED, err
+	return Status{Status: DELETED}, err
 }
 
-func (db *appdbimpl) DeleteFollow(followerID int, followingID int) (string, error) {
+func (db *appdbimpl) DeleteFollow(followerID int, followingID int) (Status, error) {
 	if followerID == followingID {
-		return "", errors.New("CAN'T UNFOLLOW YOURSELF")
+		return Status{}, errors.New("CAN'T UNFOLLOW YOURSELF")
 	}
 	_, err := db.c.Exec("DELETE FROM follows WHERE followerid=? AND followingid=?", followerID, followingID)
-	return DELETED, err
+	return Status{Status: DELETED}, err
 }
 
-func (db *appdbimpl) DeleteBan(bannedID int, bannerID int) (string, error) {
+func (db *appdbimpl) DeleteBan(bannedID int, bannerID int) (Status, error) {
 	if bannedID == bannerID {
-		return "", errors.New("CAN'T UNBAN YOURSELF")
+		return Status{}, errors.New("CAN'T UNBAN YOURSELF")
 	}
 	_, err := db.c.Exec("DELETE FROM bans WHERE bannedid=? AND bannerid=?", bannedID, bannerID)
-	return DELETED, err
+	return Status{Status: DELETED}, err
 }
 
 func (db *appdbimpl) UpdateUser(id int, username string) (User, error) {
