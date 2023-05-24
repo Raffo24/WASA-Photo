@@ -20,26 +20,6 @@ servers:
   - url: http://localhost:8080
     description: Local Server
 paths:
-    /:
-      get:
-        tags:
-          - API management
-        summary: Get the API status
-        description: Get the API status
-        operationId: getApiStatus
-        responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ApiStatus'
-          '500':
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
     /session:
       post:
         tags:
@@ -934,46 +914,6 @@ paths:
               application/json:
                 schema:
                   $ref: "#/components/schemas/Error"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /liveness:
-      get:
-        tags:
-          - status
-        summary: API live
-        description: API live
-        operationId: IsApiLive
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ApiStatus"
-          500:
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Error"
-    /context:
-      get:
-        tags:
-          - status
-        summary: API context
-        description: API context
-        operationId: GetApiContext
-        responses:
-          200:
-            description: Successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ApiStatus"
           500:
             description: Internal Server Error
             content:

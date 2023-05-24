@@ -676,7 +676,7 @@ func (db *appdbimpl) DeleteUser(id int) (string, error) {
 	if !flag {
 		return "", errors.New("USER NOT FOUND")
 	}
-	//delete all photos
+	// delete all photos
 	photos, err := db.GetPhotos(id)
 	if err == nil {
 		for idx := range photos {

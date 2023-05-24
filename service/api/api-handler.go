@@ -16,7 +16,6 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/users/:id/ban/:banId", rt.banUserHandler)
 	rt.router.PUT("/photos/:id/like/:userId", rt.likePhotoHandler)
 	// GET REQUEST
-	rt.router.GET("/", rt.getApiStatusHandler)
 	rt.router.GET("/feed", rt.getFeedHandler)
 	rt.router.GET("/users/:id", rt.getUserHandler)
 	rt.router.GET("/users/:id/photos", rt.getUserPhotosHandler)
@@ -25,8 +24,6 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/users", rt.searchUserHandler)
 	rt.router.GET("/photos/:id", rt.getPhotoHandler)
 	rt.router.GET("/photos/:id/comments", rt.getAllCommentsHandler)
-	rt.router.GET("/liveness", rt.liveness)
-	rt.router.GET("/context", rt.wrap(rt.getContextReply))
 
 	// DELETE REQUEST
 	rt.router.DELETE("/users/:id", rt.deleteUserHandler)

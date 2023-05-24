@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -79,15 +78,6 @@ func (rt *_router) securityChecker(bannerID int, r *http.Request, w http.Respons
 		return true
 	}
 	return false
-}
-
-// GET REQUEST
-func (rt *_router) getApiStatusHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
-	if json.NewEncoder(w).Encode("l'api sta funzionando correttamente") != nil {
-		w.WriteHeader(500)
-		logerr(w.Write([]byte("Internal Server Error")))
-	}
 }
 
 func (rt *_router) getUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -223,16 +213,6 @@ func (rt *_router) getAllCommentsHandler(w http.ResponseWriter, r *http.Request,
 	finalize(rt.db.JsonificaCommentsFun(output), err, w)
 }
 
-// SPECIAL GET REQUEST
-// liveness is an HTTP handler that checks the API server status. If the server cannot serve requests (e.g., some
-// resources are not ready), this should reply with HTTP Status 500. Otherwise, with HTTP Status 200
-func (rt *_router) liveness(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	if err := rt.db.Ping(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
 // POST REQUEST
 func (rt *_router) loginHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	user1 := database.User{}
@@ -316,14 +296,6 @@ func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	}
 	output, err := rt.db.AddPhoto(userID, imageUrl, title, description)
 	finalize(output, err, w)
-}
-func readAll(r io.Reader) ([]byte, error) {
-	buf := new(bytes.Buffer)
-	_, err := buf.ReadFrom(r)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }
 
 func (rt *_router) addCommentHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
