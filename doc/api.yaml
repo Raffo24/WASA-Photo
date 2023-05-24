@@ -24,6 +24,16 @@ paths:
             schema:
               $ref: "#/components/schemas/user_name"
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -77,6 +87,16 @@ paths:
             schema:
               $ref: "#/components/schemas/photo_object"
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -134,6 +154,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -188,6 +218,16 @@ paths:
             schema:
               $ref : "#/components/schemas/mini_comment_object"
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -248,6 +288,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -280,8 +330,8 @@ paths:
                 error:
                   value:
                     status: Non puoi seguire 2 volte lo stesso utente
-        '401':
-          description: Unauthorized
+        '403':
+          description: Fobidden
           content:
             application/json:
               schema:
@@ -299,6 +349,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -329,8 +389,8 @@ paths:
                 error:
                   value:
                     status: id non valido
-        '401':
-          description: Unauthorized
+        '403':
+          description: Fobidden
           content:
             application/json:
               schema:
@@ -373,6 +433,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -415,6 +485,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -435,8 +515,8 @@ paths:
                 error:
                   value:
                     status: DELETED
-        '401':
-          description: Unauthorized
+        '403':
+          description: Fobidden
           content:
             application/json:
               schema:
@@ -482,6 +562,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -541,6 +631,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -583,6 +683,16 @@ paths:
       security:
       - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -640,6 +750,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -695,6 +815,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -725,8 +855,8 @@ paths:
                 error:
                   value:
                     status: utente non presente
-        '401':
-          description: Unauthorized
+        '403':
+          description: Fobidden
           content:
             application/json:
               schema:
@@ -751,6 +881,16 @@ paths:
                 value:
                   user_name: Raffaele
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -783,7 +923,7 @@ paths:
                 error:
                   value:
                     status: id non valido
-        '401':
+        '403':
           description: Bad Request
           content:
             application/json:
@@ -811,6 +951,16 @@ paths:
           pattern: ^[a-zA-Z0-9_]*$
           example: nome
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -870,6 +1020,16 @@ paths:
       security:
       - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -930,6 +1090,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -960,14 +1130,14 @@ paths:
                 Bad_Request:
                   value: 
                     status : photo not found
-        '401':
-          description: Unauthorized
+        '403':
+          description: Fobidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/generic_response"
               examples:
-                Unauthorized:
+                Fobidden:
                   value:
                     status: Non puoi cancellare una foto che non ti appartiene
   /users/{id}/photos:
@@ -987,6 +1157,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -1079,6 +1259,16 @@ paths:
       description: Ban a user
       operationId: add_ban
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -1111,7 +1301,7 @@ paths:
                 Bad_Request:
                   value: 
                     status: Non puoi bannare 2 volte lo stesso utente
-        '401':
+        '403':
           description: Unathorized
           content:
             application/json:
@@ -1130,6 +1320,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -1160,14 +1360,14 @@ paths:
                 error:
                   value:
                     status: Non puoi sbannare 2 volte lo stesso utente
-        '401':
-          description: Unauthorized
+        '403':
+          description: Fobidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/generic_response"
               examples:
-                Unauthorized:
+                Fobidden:
                   value: 
                     status: Non puoi sbannare da un account che non ti appartiene
         '404':
@@ -1198,6 +1398,16 @@ paths:
       security:
       - BearerAuth: []
       responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Unauthorized:
+                  value:
+                    status: Non hai fatto il login
         '500':
             description: errore server
             content:
@@ -1228,14 +1438,14 @@ paths:
                 error:
                   value:
                     status: "Commento non trovato"
-        '401':
-          description: Unauthorized
+        '403':
+          description: Fobidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/generic_response"
               examples:
-                Unauthorized:
+                Fobidden:
                   value: 
                     status: Non puoi cancellare un commento che non ti appartiene
         '400':
