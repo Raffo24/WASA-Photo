@@ -23,7 +23,10 @@ func logerr(n int, err error) {
 }
 
 // PRIMITIVE FUNCTIONS TO HELP THE HANDLERS
-func finalize(output interface{}, err error, w http.ResponseWriter) {
+// add responce code of success in the parameter
+func finalize(output interface{}, err error, w http.ResponseWriter, code int) {
+	// set response code of success
+	w.WriteHeader(code)
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		if json.NewEncoder(w).Encode(output) != nil {
@@ -32,26 +35,24 @@ func finalize(output interface{}, err error, w http.ResponseWriter) {
 		}
 	} else {
 		w.WriteHeader(400)
-		// rt.baseLogger.WithError(err).Warning("getMyInfoHandler failed")
-		// w.writeHeader(http.statusBadRequest)
 		logerr(w.Write([]byte(err.Error())))
 	}
 }
 func (rt *_router) youAreLogged(r *http.Request, w http.ResponseWriter) (bool, int) {
 	myID, err := strconv.Atoi(strings.Split(r.Header.Get("Authorization"), " ")[1])
 	if err != nil {
-		w.WriteHeader(400)
+		w.WriteHeader(401)
 		logerr(w.Write([]byte("Non sei loggato")))
 		return true, 0
 	}
 	bool, err := rt.db.UserIsPresent(myID)
 	if err != nil {
-		w.WriteHeader(400)
+		w.WriteHeader(500)
 		logerr(w.Write([]byte("server error")))
 		return true, 0
 	}
 	if !bool {
-		w.WriteHeader(400)
+		w.WriteHeader(404)
 		logerr(w.Write([]byte("utente non presente")))
 		return true, 0
 	}
@@ -81,6 +82,10 @@ func (rt *_router) securityChecker(bannerID int, r *http.Request, w http.Respons
 }
 
 func (rt *_router) getUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	flag, _ := rt.youAreLogged(r, w)
+	if flag {
+		return
+	}
 	userID, err := strconv.Atoi(ps.ByName("id"))
 	if err != nil {
 		w.WriteHeader(400)
@@ -91,9 +96,18 @@ func (rt *_router) getUserHandler(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	user, err := rt.db.GetUserExtendedByID(userID)
-	finalize(user, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("user id not exist")))
+		return
+	}
+	finalize(user, err, w, 200)
 }
 func (rt *_router) getUserPhotosHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	flag, _ := rt.youAreLogged(r, w)
+	if flag {
+		return
+	}
 	userID, err := strconv.Atoi(ps.ByName("id"))
 	if err != nil {
 		w.WriteHeader(400)
@@ -104,9 +118,18 @@ func (rt *_router) getUserPhotosHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 	output, err := rt.db.GetPhotos(userID)
-	finalize(rt.db.JsonificaPhotosFun(output), err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("user id not exist")))
+		return
+	}
+	finalize(rt.db.JsonificaPhotosFun(output), err, w, 200)
 }
 func (rt *_router) getFollowersHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	flag, _ := rt.youAreLogged(r, w)
+	if flag {
+		return
+	}
 	userID, err := strconv.Atoi(ps.ByName("id"))
 	if err != nil {
 		w.WriteHeader(400)
@@ -117,10 +140,19 @@ func (rt *_router) getFollowersHandler(w http.ResponseWriter, r *http.Request, p
 		return
 	}
 	output, err := rt.db.GetFollowersID(userID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("user id not exist")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 
 func (rt *_router) getFollowingHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	flag, _ := rt.youAreLogged(r, w)
+	if flag {
+		return
+	}
 	userID, err := strconv.Atoi(ps.ByName("id"))
 	if err != nil {
 		w.WriteHeader(400)
@@ -131,7 +163,12 @@ func (rt *_router) getFollowingHandler(w http.ResponseWriter, r *http.Request, p
 		return
 	}
 	output, err := rt.db.GetFollowingID(userID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("user id not exist")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 
 func (rt *_router) searchUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -140,9 +177,15 @@ func (rt *_router) searchUserHandler(w http.ResponseWriter, r *http.Request, ps 
 	if flag {
 		return
 	}
+
 	username_searched := r.URL.Query().Get("query")
+	if username_searched == "" {
+		w.WriteHeader(400)
+		logerr(w.Write([]byte("query is empty")))
+		return
+	}
 	output, err := rt.db.SearchUser(username_searched, userID)
-	finalize(rt.db.JsonificaUsersFun(output), err, w)
+	finalize(rt.db.JsonificaUsersFun(output), err, w, 200)
 }
 func (rt *_router) getFeedHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, userID := rt.youAreLogged(r, w)
@@ -150,9 +193,18 @@ func (rt *_router) getFeedHandler(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	output, err := rt.db.GetFeed(userID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("user id not exist")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 func (rt *_router) getPhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	flag, _ := rt.youAreLogged(r, w)
+	if flag {
+		return
+	}
 	id, err := strconv.Atoi(ps.ByName("id"))
 	if err != nil {
 		w.WriteHeader(400)
@@ -161,7 +213,7 @@ func (rt *_router) getPhotoHandler(w http.ResponseWriter, r *http.Request, ps ht
 	}
 	photo, err := rt.db.GetPhoto(id)
 	if err != nil {
-		w.WriteHeader(400)
+		w.WriteHeader(404)
 		logerr(w.Write([]byte("photo not found in db")))
 		return
 	}
@@ -170,17 +222,16 @@ func (rt *_router) getPhotoHandler(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 	// read photo from disk
-
 	file, err := os.Open(photo.Photourl)
 	if err != nil {
-		w.WriteHeader(400)
-		logerr(w.Write([]byte("photo not found on disk")))
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("photo not found")))
 		return
 	}
 	fi, err := file.Stat()
 	if err != nil {
-		w.WriteHeader(400)
-		logerr(w.Write([]byte("error reading stat of photo")))
+		w.WriteHeader(500)
+		logerr(w.Write([]byte("internal error reading data of the photo")))
 		return
 	}
 	defer file.Close()
@@ -193,8 +244,8 @@ func (rt *_router) getPhotoHandler(w http.ResponseWriter, r *http.Request, ps ht
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Header().Set("Content-Length", strconv.Itoa(int(fi.Size())))
 	if _, err := io.Copy(w, file); err != nil {
-		w.WriteHeader(400)
-		logerr(w.Write([]byte("error writing photo to response")))
+		w.WriteHeader(500)
+		logerr(w.Write([]byte("internal error writing photo to response")))
 		return
 	}
 }
@@ -210,7 +261,12 @@ func (rt *_router) getAllCommentsHandler(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	output, err := rt.db.GetCommentsByPhotoID(id)
-	finalize(rt.db.JsonificaCommentsFun(output), err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("photo not found in db")))
+		return
+	}
+	finalize(rt.db.JsonificaCommentsFun(output), err, w, 200)
 }
 
 // POST REQUEST
@@ -221,11 +277,13 @@ func (rt *_router) loginHandler(w http.ResponseWriter, r *http.Request, ps httpr
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	code := 200
 	user, err := rt.db.GetUserByUsername(user1.Username)
 	if err != nil {
 		user, err = rt.db.AddUser(user1.Username)
+		code = 201
 	}
-	finalize(user, err, w)
+	finalize(user, err, w, code)
 }
 
 func (rt *_router) changeMyNameHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -235,7 +293,7 @@ func (rt *_router) changeMyNameHandler(w http.ResponseWriter, r *http.Request, p
 	}
 	id, err := strconv.Atoi(ps.ByName("id"))
 	if myID != id {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi cambiare il nome di un altro utente")))
 		return
 	}
@@ -251,7 +309,12 @@ func (rt *_router) changeMyNameHandler(w http.ResponseWriter, r *http.Request, p
 		return
 	}
 	output, err := rt.db.UpdateUser(id, user.Username)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("user not found in db")))
+		return
+	}
+	finalize(output, err, w, 201)
 }
 func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, userID := rt.youAreLogged(r, w)
@@ -281,8 +344,8 @@ func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	imageUrl := "service/api/images/" + strconv.Itoa(userID) + "_" + strconv.Itoa(int(time.Now().Unix())) + ".jpg"
 	f, err := os.Create(imageUrl)
 	if err != nil {
-		w.WriteHeader(400)
-		logerr(w.Write([]byte("error create file")))
+		w.WriteHeader(500)
+		logerr(w.Write([]byte("internal error create file")))
 		return
 	}
 	defer f.Close()
@@ -290,12 +353,12 @@ func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	// copy the uploaded file into the local filesystem
 	_, err = io.Copy(f, file)
 	if err != nil {
-		w.WriteHeader(400)
-		logerr(w.Write([]byte("error copy file")))
+		w.WriteHeader(500)
+		logerr(w.Write([]byte("internal error copy file")))
 		return
 	}
 	output, err := rt.db.AddPhoto(userID, imageUrl, title, description)
-	finalize(output, err, w)
+	finalize(output, err, w, 201)
 }
 
 func (rt *_router) addCommentHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -316,7 +379,7 @@ func (rt *_router) addCommentHandler(w http.ResponseWriter, r *http.Request, ps 
 		return
 	}
 	output, err := rt.db.AddComment(id, userID, comment.Content)
-	finalize(output, err, w)
+	finalize(output, err, w, 201)
 }
 
 // PUT REQUEST
@@ -332,7 +395,7 @@ func (rt *_router) likePhotoHandler(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 	if myID != userID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi mettere like da un altro utente")))
 		return
 	}
@@ -343,7 +406,7 @@ func (rt *_router) likePhotoHandler(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 	output, err := rt.db.AddLike(photoID, userID)
-	finalize(output, err, w)
+	finalize(output, err, w, 201)
 }
 func (rt *_router) followUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, myID := rt.youAreLogged(r, w)
@@ -363,17 +426,17 @@ func (rt *_router) followUserHandler(w http.ResponseWriter, r *http.Request, ps 
 		return
 	}
 	if myID != followerID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi seguire utilizzando un altro utente")))
 		return
 	}
 	if rt.youAreBanned(myID, followingID, r, w) {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi seguire un utente che ti ha bannato")))
 		return
 	}
 	output, err := rt.db.AddFollow(followerID, followingID)
-	finalize(output, err, w)
+	finalize(output, err, w, 201)
 }
 
 func (rt *_router) banUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -388,7 +451,7 @@ func (rt *_router) banUserHandler(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	if myID != bannerID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi bannare utilizzando un altro utente")))
 		return
 	}
@@ -399,7 +462,7 @@ func (rt *_router) banUserHandler(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	output, err := rt.db.AddBan(bannedID, bannerID)
-	finalize(output, err, w)
+	finalize(output, err, w, 201)
 }
 
 // DELETE REQUEST
@@ -415,12 +478,17 @@ func (rt *_router) deleteUserHandler(w http.ResponseWriter, r *http.Request, ps 
 		return
 	}
 	if myID != userID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi cancellare un utente che non ti appartiene")))
 		return
 	}
 	output, err := rt.db.DeleteUser(userID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("user id not exist")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 
 func (rt *_router) deleteCommentHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -436,17 +504,22 @@ func (rt *_router) deleteCommentHandler(w http.ResponseWriter, r *http.Request, 
 	}
 	comment, err := rt.db.GetCommentByID(commentID)
 	if err != nil {
-		w.WriteHeader(400)
+		w.WriteHeader(404)
 		logerr(w.Write([]byte("comment not found")))
 		return
 	}
 	if comment.UserID != myID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi cancellare un commento che non ti appartiene")))
 		return
 	}
 	output, err := rt.db.DeleteComment(commentID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("comment not found")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 func (rt *_router) deletePhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, myID := rt.youAreLogged(r, w)
@@ -461,17 +534,22 @@ func (rt *_router) deletePhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	}
 	photo, err := rt.db.GetPhoto(photoID)
 	if err != nil {
-		w.WriteHeader(400)
+		w.WriteHeader(404)
 		logerr(w.Write([]byte("photo not found")))
 		return
 	}
 	if photo.UserID != myID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi cancellare una foto che non ti appartiene")))
 		return
 	}
 	output, err := rt.db.DeletePhoto(photoID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("photo not found")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 func (rt *_router) unlikePhotoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, myID := rt.youAreLogged(r, w)
@@ -491,12 +569,17 @@ func (rt *_router) unlikePhotoHandler(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 	if myID != userID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi levare un like che non hai messo tu")))
 		return
 	}
 	output, err := rt.db.DeleteLike(photoID, userID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("like not found")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 func (rt *_router) unfollowUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, myID := rt.youAreLogged(r, w)
@@ -506,22 +589,27 @@ func (rt *_router) unfollowUserHandler(w http.ResponseWriter, r *http.Request, p
 	followerID, err := strconv.Atoi(ps.ByName("id"))
 	if err != nil {
 		w.WriteHeader(400)
-		logerr(w.Write([]byte("follow id is empty")))
+		logerr(w.Write([]byte("follower id is empty")))
 		return
 	}
 	if myID != followerID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi smettere di seguire da un account che non ti appartiene")))
 		return
 	}
 	followingID, err := strconv.Atoi(ps.ByName("followId"))
 	if err != nil {
 		w.WriteHeader(400)
-		logerr(w.Write([]byte("follow id is empty")))
+		logerr(w.Write([]byte("following id is empty")))
 		return
 	}
 	output, err := rt.db.DeleteFollow(followerID, followingID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("follow not exist")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
 
 func (rt *_router) unbanUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -536,7 +624,7 @@ func (rt *_router) unbanUserHandler(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 	if myID != bannerID {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		logerr(w.Write([]byte("Non puoi sbannare da un account che non ti appartiene")))
 		return
 	}
@@ -547,5 +635,10 @@ func (rt *_router) unbanUserHandler(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 	output, err := rt.db.DeleteBan(bannedID, bannerID)
-	finalize(output, err, w)
+	if err != nil {
+		w.WriteHeader(404)
+		logerr(w.Write([]byte("ban not exist")))
+		return
+	}
+	finalize(output, err, w, 200)
 }
