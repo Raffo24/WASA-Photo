@@ -24,6 +24,16 @@ paths:
             schema:
               $ref: "#/components/schemas/user_name"
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: login effettuato
           content:
@@ -45,7 +55,7 @@ paths:
                   value:
                     id: 1
         '400':
-          description: errore login
+          description: bad request
           content:
             application/json:
               schema:
@@ -67,6 +77,16 @@ paths:
             schema:
               $ref: "#/components/schemas/photo_object"
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '201':
           description: upload effettuato
           content:
@@ -114,6 +134,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: commento inserito
           content:
@@ -158,6 +188,16 @@ paths:
             schema:
               $ref : "#/components/schemas/mini_comment_object"
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '201':
           description: commento inserito
           content:
@@ -208,7 +248,17 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
+        '201':
           description: utente seguito
           content:
             application/json:
@@ -249,6 +299,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: utente con id {id} non segue più l'utente con id {followid}
           content:
@@ -268,7 +328,7 @@ paths:
               examples:
                 error:
                   value:
-                    status: utente non presente
+                    status: id non valido
         '401':
           description: Unauthorized
           content:
@@ -279,6 +339,16 @@ paths:
                 error:
                   value:
                     status: Non puoi smettere di seguire da un account che non ti appartiene
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                error:
+                  value:
+                    status: Non puoi smettere di seguire un utente che non esiste
 
   /photos/{id}/like/{user_id}:
     parameters:
@@ -303,7 +373,17 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
+        '201':
           description: like inserito
           content:
             application/json:
@@ -335,6 +415,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: l'utente con id {user_id} ha tolto il like alla foto con id {id}
           content:
@@ -355,6 +445,26 @@ paths:
                 error:
                   value:
                     status: Non puoi levare un like che non hai messo tu
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                error:
+                  value:
+                    status: Non puoi levare un like da una foto che non esiste
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                error:
+                  value:
+                    status: id non valido
   /users/{id}/followers:
     parameters:
       - name: id
@@ -372,6 +482,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: utenti che seguono l'utente scelto
           content:
@@ -393,7 +513,17 @@ paths:
               examples:
                 error:
                   value:
-                    status: utente non presente
+                    status: id non valido
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                error:
+                  value:
+                    status: Non esiste nessun utente con questo id
   /users/{id}/following:
     parameters:
       - name: id
@@ -411,6 +541,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: utenti che seguono l'utente scelto
           content:
@@ -443,6 +583,16 @@ paths:
       security:
       - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: /feed
           content:
@@ -490,6 +640,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: dati utente
           content:
@@ -515,7 +675,17 @@ paths:
               examples:
                 error:
                   value:
-                    status: L'utente con quell'id non esiste
+                    status: id non valido
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                error:
+                  value:
+                    status: utente non trovato
     delete:
       tags:
         - user_info
@@ -525,6 +695,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: utente eliminato
           content:
@@ -571,6 +751,16 @@ paths:
                 value:
                   user_name: Raffaele
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '201':
           description: nome utente modificato
           content:
@@ -621,6 +811,16 @@ paths:
           pattern: ^[a-zA-Z0-9_]*$
           example: nome
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: lista utenti con user_name che contiene la stringa passata
           content:
@@ -670,6 +870,16 @@ paths:
       security:
       - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: dati foto
           content:
@@ -691,6 +901,26 @@ paths:
                 Bad_Request:
                   value: 
                     status: utente non presente
+        '404':
+          description: Photo not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Not_Found:
+                  value: 
+                    status: photo not found
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Forbidden:
+                  value: 
+                    status: sei stato bannato da chi ha caricato questa foto
     delete:
       tags:
         - photos
@@ -700,6 +930,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: la foto con id {id} è stata eliminata
           content:
@@ -747,6 +987,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: Lista di foto postate dall'utente con id passato
           content:
@@ -786,6 +1036,26 @@ paths:
               examples:
                 Bad_Request:
                   value:
+                    status: id non valido
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Forbidden:
+                  value:
+                    status: sei stato bannato da questo utente
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generic_response"
+              examples:
+                Not_Found:
+                  value:
                     status: utente non presente
   
   /users/{id}/ban/{banid}:
@@ -809,6 +1079,16 @@ paths:
       description: Ban a user
       operationId: add_ban
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: utente bannato
           content:
@@ -850,6 +1130,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: l'utente con id {id} ha bannato l'utente con id {banid}
           content:
@@ -908,6 +1198,16 @@ paths:
       security:
       - BearerAuth: []
       responses:
+        '500':
+            description: errore server
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/generic_response"
+                examples:
+                  error:
+                    value:
+                      status: "errore server"
         '200':
           description: il commento con id {id} è stato eliminato
           content:
