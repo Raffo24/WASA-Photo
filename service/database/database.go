@@ -40,7 +40,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO sostituisci questo deleted con un okay generico
 const DELETED = "DELETED"
 
 // Status Object
