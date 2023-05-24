@@ -55,7 +55,7 @@ export default {
 			if (response == null) return // An error occurred. The interceptor will show a modal
 
 			// Append the new photos to the array
-			this.stream_data = this.stream_data.concat(response.data)
+			this.stream_data = response.data.Items
 
 			// Disable the loading spinner
 			this.loading = false

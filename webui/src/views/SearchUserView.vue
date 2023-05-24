@@ -28,8 +28,7 @@ export default {
 				this.loading = false
 				return
 			}
-
-			else this.streamData = response.data;
+			else this.streamData = response.data.Items;
 			this.loading = false;
 		}
 

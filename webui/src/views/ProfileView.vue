@@ -36,7 +36,6 @@ export default {
 		},
 
 		async getMainData() {
-			console.log("/users/" + this.requestedProfile)
 			let response = await this.$axios.get("/users/" + this.requestedProfile);
 			if (response == null) {
 				this.loading = false
@@ -55,7 +54,7 @@ export default {
 				this.loadingError = true
 				return
 			}
-			this.stream_data = response.data
+			this.stream_data = response.data.Items
 			this.loading = false
 		},
 	},

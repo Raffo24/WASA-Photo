@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: WASAPhoto API
-  description: API to create a Bearer Authentication Token with OpenAPI 3.0
+  description: This is the API documentation for the WASAPhoto application
   version: 1.0.0
 tags:
   - name: "API management"
@@ -1113,6 +1113,7 @@ components:
           username: "Maria"
         - id: "12346"
           username: "Maria"
+    
     Token:
       description: Token data
       type: object

@@ -114,7 +114,7 @@ func (rt *_router) getUserPhotosHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 	output, err := rt.db.GetPhotos(userID)
-	finalize(output, err, w)
+	finalize(rt.db.JsonificaPhotosFun(output), err, w)
 }
 func (rt *_router) getFollowersHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	userID, err := strconv.Atoi(ps.ByName("id"))
@@ -152,7 +152,7 @@ func (rt *_router) searchUserHandler(w http.ResponseWriter, r *http.Request, ps 
 	}
 	username_searched := r.URL.Query().Get("query")
 	output, err := rt.db.SearchUser(username_searched, userID)
-	finalize(output, err, w)
+	finalize(rt.db.JsonificaUsersFun(output), err, w)
 }
 func (rt *_router) getFeedHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, userID := rt.youAreLogged(r, w)
@@ -220,7 +220,7 @@ func (rt *_router) getAllCommentsHandler(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	output, err := rt.db.GetCommentsByPhotoID(id)
-	finalize(output, err, w)
+	finalize(rt.db.JsonificaCommentsFun(output), err, w)
 }
 
 // SPECIAL GET REQUEST

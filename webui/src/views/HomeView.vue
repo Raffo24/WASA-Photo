@@ -19,7 +19,6 @@ export default {
 			this.loading = true;
 
 			let response = await this.$axios.get("/feed");
-			console.log(response);
 
 			if (response == null) {
 				this.loading = false

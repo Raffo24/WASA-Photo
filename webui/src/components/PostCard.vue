@@ -57,10 +57,8 @@ export default {
 		},
 
 		getComments() {
-			console.log("/photos/" + this.photo_id + "/comments")
 			this.$axios.get("/photos/" + this.photo_id + "/comments").then(response => {
-					console.log(response.data)
-					this.comments_data = this.comments_data.concat(response.data);
+					this.comments_data = this.comments_data.concat(response.data.Items);
 					this.comments_shown = true;
 				})
 		},

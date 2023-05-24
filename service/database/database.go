@@ -100,6 +100,9 @@ type Follow struct {
 	FollowerID  int
 	FollowingID int
 }
+type JsonificaUsersBanFollow struct{ Items []UserBanFollow }
+type JsonificaPhotos struct{ Items []Photo }
+type JsonificaComments struct{ Items []Comment }
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
@@ -133,6 +136,9 @@ type AppDatabase interface {
 	GetCommentByID(id int) (Comment, error)
 	UserIsPresent(id int) (bool, error)
 	UserIsBanned(bannerID int, bannedID int) (bool, error)
+	JsonificaUsersFun(users []UserBanFollow) JsonificaUsersBanFollow
+	JsonificaPhotosFun(photos []Photo) JsonificaPhotos
+	JsonificaCommentsFun(comments []Comment) JsonificaComments
 }
 
 type appdbimpl struct {
@@ -282,7 +288,22 @@ func (db *appdbimpl) GetUsers() ([]User, error) {
 	}
 	return users, nil
 }
+func (db *appdbimpl) JsonificaUsersFun(users []UserBanFollow) JsonificaUsersBanFollow {
+	return JsonificaUsersBanFollow{
+		Items: users,
+	}
+}
+func (db *appdbimpl) JsonificaPhotosFun(photos []Photo) JsonificaPhotos {
+	return JsonificaPhotos{
+		Items: photos,
+	}
 
+}
+func (db *appdbimpl) JsonificaCommentsFun(comments []Comment) JsonificaComments {
+	return JsonificaComments{
+		Items: comments,
+	}
+}
 func (db *appdbimpl) GetPhotos(userID int) ([]Photo, error) {
 	rows, err := db.c.Query("SELECT id, userid, photourl, title, description, createdat FROM photos where userid = ?", userID)
 	if err != nil {
