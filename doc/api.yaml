@@ -17,7 +17,7 @@ paths:
           it will be created and
           an identification token will be returned
           if the user exist, the user identifier will be returned
-      operationId: create_or_login_user
+      operationId: doLogin
       requestBody:
         content:
           application/json:
@@ -80,7 +80,7 @@ paths:
       - photos
       summary: Upload photo
       description: Upload a new photo
-      operationId: create_photo
+      operationId: uploadPhoto
       requestBody:
         content:
           multipart/form-data:
@@ -211,7 +211,7 @@ paths:
       - photos
       summary: Post photo Comment
       description: Post a comment for a photo
-      operationId: create_comment
+      operationId: commentPhoto
       requestBody:
         content:
           application/json:
@@ -284,7 +284,7 @@ paths:
       - social_network
       summary: Follow User
       description: Follow a user
-      operationId: add_follow_user
+      operationId: followUser
       security:
         - BearerAuth: []
       responses:
@@ -345,7 +345,7 @@ paths:
         - social_network
       summary: Unfollow User
       description: Unfollow a user
-      operationId: delete_follow_user
+      operationId: unfollowUser
       security:
         - BearerAuth: []
       responses:
@@ -429,7 +429,7 @@ paths:
         - photos
       summary: Like photo
       description: Like a photo
-      operationId: add_like_photo
+      operationId: likePhoto
       security:
         - BearerAuth: []
       responses:
@@ -481,7 +481,7 @@ paths:
         - photos
       summary: Unlike photo
       description: Unlike a photo
-      operationId: delete_like_photo
+      operationId: unlikePhoto
       security:
         - BearerAuth: []
       responses:
@@ -679,7 +679,7 @@ paths:
       - feed_stream
       summary: Get feed_stream
       description: Get the feed_stream of the user
-      operationId: get_my_stream
+      operationId: getMyStream
       security:
       - BearerAuth: []
       responses:
@@ -746,7 +746,7 @@ paths:
         - user_info
       summary: Get User Profile
       description: Get a user profile
-      operationId: get_user_profile
+      operationId: getUserProfile
       security:
         - BearerAuth: []
       responses:
@@ -870,7 +870,7 @@ paths:
         - user_info
       summary: Update user_name
       description: Update my user_name
-      operationId: replace_my_user_name
+      operationId: setMyUserName
       requestBody:
         content:
           application/json:
@@ -1086,7 +1086,7 @@ paths:
         - photos
       summary: Delete photo
       description: Delete a photo
-      operationId: delete_photo
+      operationId: deletePhoto
       security:
         - BearerAuth: []
       responses:
@@ -1257,7 +1257,7 @@ paths:
         - social_network
       summary: Ban User
       description: Ban a user
-      operationId: add_ban
+      operationId: banUser
       responses:
         '401':
           description: Unauthorized
@@ -1316,7 +1316,7 @@ paths:
         - social_network 
       summary: Unban User
       description: Unban a user
-      operationId: delete_ban
+      operationId: unbanUser
       security:
         - BearerAuth: []
       responses:
@@ -1394,7 +1394,7 @@ paths:
       - photos
       summary: Delete photo Comment
       description: Delete a comment for a photo
-      operationId: delete_comment
+      operationId: uncommentPhoto
       security:
       - BearerAuth: []
       responses:
