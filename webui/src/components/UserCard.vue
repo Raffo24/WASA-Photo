@@ -17,8 +17,8 @@ export default {
             username: this.name,
             user_followed: this.followed,
             user_banned: this.banned,
-            formData : new FormData(),
-            user_data : this.user_data,
+            formData: new FormData(),
+            user_datas: this.user_data,
 
             myself: this.$currentSession() == this.user_id,
 
@@ -116,8 +116,8 @@ export default {
             <div class="row">
                 <div class="col-12">
                     <div class="card-body h-100" :style="{
-                                            'justify-content': (this.user_data ? 'center' : 'space-between'),
-                                            'align-items': (this.user_data ? 'center' : 'start'),
+                                            'justify-content': (user_datas ? 'center' : 'space-between'),
+                                            'align-items': (user_datas ? 'center' : 'start'),
                                             'display': 'flex'
                                             }">
                         <a @click="visit">
@@ -126,7 +126,7 @@ export default {
                             </h5>
                         </a>
                         
-                        <div class="d-flex flex-column" v-if="!(user_data)">
+                        <div class="d-flex flex-column" v-if="!(user_datas)">
                             <div v-if="!myself" class="d-flex">
                                 <button v-if="!user_banned" @click="ban" type="button"
                                     class="btn btn-outline-danger me-2">Ban</button>
@@ -140,10 +140,10 @@ export default {
                         </div>
                     </div>
                 </div>
-                <div class="col-12" v-if="(user_data)">
-                    <ProfileCounters :user_data="user_data" />
+                <div class="col-12" v-if="(user_datas)">
+                    <ProfileCounters :user_data="user_datas" />
                 </div>
-                <div class="d-flex flex-column" v-if="(user_data)" v-bind:class="{
+                <div class="d-flex flex-column" v-if="(user_datas)" v-bind:class="{
                                                 'col-12': (myself && show_new_post),
                                                 'col-sm:12': (myself && show_new_post),
                                                 'col-12': !(myself && show_new_post),
