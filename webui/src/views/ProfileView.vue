@@ -5,7 +5,7 @@ export default {
 			requestedProfile: this.$route.params.user_id,
 			loading: true,
 			loadingError: false,
-			user_data: [],
+			udata: [],
 			stream_data: [],
 
 		};
@@ -42,7 +42,7 @@ export default {
 				this.loadingError = true
 				return
 			}
-			this.user_data = response.data
+			this.udata = response.data
 		},
 
 		// Fetch photos
@@ -69,8 +69,8 @@ export default {
 				<div class="col-xl-6 col-lg-9">
 
 					<!-- User card -->
-					<UserCard :user_id="requestedProfile" :name="user_data['Username']" :followed="user_data['Followers']"
-						:banned="user_data['Banned']" :my_id="this.$currentSession" :show_new_post="true" :user_data="user_data"
+					<UserCard :user_id="requestedProfile" :name="udata['Username']" :followed="udata['Followers']"
+						:banned="udata['Banned']" :my_id="this.$currentSession" :show_new_post="true" :user_data="udata"
 						@updateInfo="getMainData" @updatePosts="refresh" />
 
 					<!-- counters -->

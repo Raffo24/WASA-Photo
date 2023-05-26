@@ -5,7 +5,7 @@ export default {
 			requestedProfile: this.$route.params.user_id,
 			loading: true,
 			loadingError: false,
-			user_data: [],
+			udata: [],
 			stream_data: [],
 		};
 	},
@@ -45,7 +45,7 @@ export default {
 				this.loadingError = true
 				return
 			}
-			this.user_data = response.data
+			this.udata = response.data
 		},
 
 		// Fetch photos from the server
@@ -72,14 +72,14 @@ export default {
 				<div class="col-xl-6 col-lg-9">
 
 					<!-- User card for profile info -->
-					<UserCard :user_id="requestedProfile" :name="user_data['Username']" :followed="user_data['Followers']"
-						:banned="user_data['Banned']" :my_id="this.$currentSession" :show_new_post="true" :user_data="user_data"
+					<UserCard :user_id="requestedProfile" :name="udata['Username']" :followed="udata['Followers']"
+						:banned="udata['Banned']" :my_id="this.$currentSession" :show_new_post="true" :user_data="udata"
 						@updateInfo="getMainData" @updatePosts="refresh" />
 
 					<!-- Photos -->
 					<div id="main-content" v-for="item of stream_data" v-bind:key="item.ID">
 						<!-- PostCard for the photo -->
-						<PostCard :user_id="requestedProfile" :photo_id="item.ID" :username="user_data['Username']"
+						<PostCard :user_id="requestedProfile" :photo_id="item.ID" :username="udata['Username']"
 							:date="item.CreatedAt" :comments="item.Comments" :likes="item.Likes" :liked="item.Liked" :title="item.Title" />
 					</div>
 
