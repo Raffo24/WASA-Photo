@@ -128,7 +128,7 @@ type AppDatabase interface {
 	AddLike(photoID int, userID int) (Like, error)
 	AddFollow(followerID int, followingID int) (Follow, error)
 	AddBan(bannedID int, bannerID int) (Ban, error)
-	DeleteUser(id int) (Status, error)
+	//DeleteUser(id int) (Status, error)
 	DeletePhoto(id int) (Status, error)
 	DeleteComment(id int) (Status, error)
 	DeleteLike(photoID int, userID int) (Status, error)
@@ -697,7 +697,7 @@ func (db *appdbimpl) AddBan(bannedID int, bannerID int) (Ban, error) {
 	}, err
 }
 
-func (db *appdbimpl) DeleteUser(id int) (Status, error) {
+/*func (db *appdbimpl) DeleteUser(id int) (Status, error) {
 	flag, err := db.UserIsPresent(id)
 	if err != nil {
 		logrus.Error(err)
@@ -721,6 +721,7 @@ func (db *appdbimpl) DeleteUser(id int) (Status, error) {
 	_, err = db.c.Exec("DELETE FROM users WHERE id=?", id)
 	return Status{Status: DELETED}, err
 }
+*/
 
 func (db *appdbimpl) DeletePhoto(id int) (Status, error) {
 	photo, err := db.GetPhoto(id)

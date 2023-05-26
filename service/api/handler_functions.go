@@ -466,7 +466,7 @@ func (rt *_router) banUserHandler(w http.ResponseWriter, r *http.Request, ps htt
 }
 
 // DELETE REQUEST
-func (rt *_router) deleteUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+/*func (rt *_router) deleteUserHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, myID := rt.youAreLogged(r, w)
 	if flag {
 		return
@@ -490,6 +490,7 @@ func (rt *_router) deleteUserHandler(w http.ResponseWriter, r *http.Request, ps 
 	}
 	finalize(output, err, w, 200)
 }
+*/
 
 func (rt *_router) deleteCommentHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	flag, myID := rt.youAreLogged(r, w)

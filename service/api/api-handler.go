@@ -24,9 +24,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/users", rt.searchUserHandler)
 	rt.router.GET("/photos/:id", rt.getPhotoHandler)
 	rt.router.GET("/photos/:id/comments", rt.getAllCommentsHandler)
-
 	// DELETE REQUEST
-	rt.router.DELETE("/users/:id", rt.deleteUserHandler)
+	//rt.router.DELETE("/users/:id", rt.deleteUserHandler)
 	rt.router.DELETE("/users/:id/follow/:followId", rt.unfollowUserHandler)
 	rt.router.DELETE("/users/:id/ban/:banId", rt.unbanUserHandler)
 	rt.router.DELETE("/photos/:id", rt.deletePhotoHandler)
