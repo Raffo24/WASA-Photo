@@ -300,7 +300,7 @@ func (db *appdbimpl) GetUsers() ([]User, error) {
 			Username: username,
 		})
 	}
-	return users, nil
+	return users, err
 }
 func (db *appdbimpl) JsonificaUsersFun(users []UserBanFollow) JsonificaUsersBanFollow {
 	return JsonificaUsersBanFollow{
@@ -625,6 +625,9 @@ func (db *appdbimpl) AddUser(username string) (User, error) {
 		return User{}, err
 	}
 	id, err := res.LastInsertId()
+	if err != nil {
+		return User{}, err
+	}
 	return User{
 		ID:       int(id),
 		Username: username,
@@ -650,6 +653,9 @@ func (db *appdbimpl) AddComment(photoID int, userID int, comment string) (Commen
 		return Comment{}, err
 	}
 	id, err := res.LastInsertId()
+	if err != nil {
+		return Comment{}, err
+	}
 	return Comment{
 		ID:      int(id),
 		PhotoID: photoID,
@@ -783,7 +789,6 @@ func (db *appdbimpl) SearchUser(search_username string, userID int) ([]UserBanFo
 		if err != nil {
 			return nil, err
 		}
-
 		banned, err := db.UserIsBanned(userID, id)
 		if err != nil {
 			return nil, err
