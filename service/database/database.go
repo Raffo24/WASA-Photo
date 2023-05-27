@@ -689,6 +689,9 @@ func (db *appdbimpl) AddBan(bannedID int, bannerID int) (Ban, error) {
 		}
 	}
 	_, err = db.c.Exec("DELETE FROM users WHERE id=?", id)
+	if err != nil {
+		logrus.Error(err)
+	}
 	return Status{Status: DELETED}, err
 }
 */
@@ -702,16 +705,25 @@ func (db *appdbimpl) DeletePhoto(id int) (Status, error) {
 		return Status{}, errors.New("IMAGE NOT found")
 	}
 	_, err = db.c.Exec("DELETE FROM photos WHERE id=?", id)
+	if err != nil {
+		return Status{}, err
+	}
 	return Status{Status: DELETED}, err
 }
 
 func (db *appdbimpl) DeleteComment(id int) (Status, error) {
 	_, err := db.c.Exec("DELETE FROM comments WHERE id=?", id)
+	if err != nil {
+		return Status{}, err
+	}
 	return Status{Status: DELETED}, err
 }
 
 func (db *appdbimpl) DeleteLike(photoID int, userID int) (Status, error) {
 	_, err := db.c.Exec("DELETE FROM likes WHERE photoid=? AND userid=?", photoID, userID)
+	if err != nil {
+		return Status{}, err
+	}
 	return Status{Status: DELETED}, err
 }
 
@@ -720,6 +732,9 @@ func (db *appdbimpl) DeleteFollow(followerID int, followingID int) (Status, erro
 		return Status{}, errors.New("CAN'T UNFOLLOW YOURSELF")
 	}
 	_, err := db.c.Exec("DELETE FROM follows WHERE followerid=? AND followingid=?", followerID, followingID)
+	if err != nil {
+		return Status{}, err
+	}
 	return Status{Status: DELETED}, err
 }
 
@@ -728,16 +743,21 @@ func (db *appdbimpl) DeleteBan(bannedID int, bannerID int) (Status, error) {
 		return Status{}, errors.New("CAN'T UNBAN YOURSELF")
 	}
 	_, err := db.c.Exec("DELETE FROM bans WHERE bannedid=? AND bannerid=?", bannedID, bannerID)
+	if err != nil {
+		return Status{}, err
+	}
 	return Status{Status: DELETED}, err
 }
 
 func (db *appdbimpl) UpdateUser(id int, username string) (User, error) {
 	_, err := db.c.Exec("UPDATE users SET username=? WHERE id=?", username, id)
 	if err != nil {
-		logrus.Error(err)
 		return User{}, err
 	}
 	user, err := db.GetUserByID(id)
+	if err != nil {
+		return User{}, err
+	}
 	return user, err
 }
 
