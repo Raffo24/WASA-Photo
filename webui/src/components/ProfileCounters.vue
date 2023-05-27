@@ -23,7 +23,12 @@ export default {
         },
 
         async loadContent() {
-            let response = await this.$axios.get("/users/" + this.user_data["ID"] + "/" + this.data_type)
+            let response = null
+            if (this.data_type == 'followers') {
+                response = await this.$axios.get("/users/" + this.user_data["ID"] + "/followers")
+            } else if (this.data_type == 'following'){
+                response = await this.$axios.get("/users/" + this.user_data["ID"] + "/following")
+            }
             if (response == null) return false
 
             this.modal_data = this.modal_data.concat(response.data)
