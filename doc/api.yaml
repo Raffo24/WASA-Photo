@@ -1655,7 +1655,7 @@ components:
           type: number
           example: 1
     comments:
-      description: The json that contains an array of comments
+      description: contains an array of comments
       type: object
       properties:
         array_of_comments:
@@ -1749,7 +1749,7 @@ components:
           pattern: "^[a-zA-Z0-9_ !]*$"
           example: Raffaele
     photos:
-      description: The json that contains an array of photos
+      description: contains an array of photos
       type: object
       properties:
         array_of_photos:
@@ -1760,7 +1760,7 @@ components:
           minItems: 0
           maxItems: 100
     users:
-      description: The json that contains an array of users
+      description: contains an array of users
       type: object
       properties:
         users:
