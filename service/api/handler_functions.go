@@ -341,7 +341,7 @@ func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	}
 	defer file.Close()
 	// store uploaded file into local path
-	imageUrl := "service/api/images/" + strconv.Itoa(userID) + "_" + strconv.Itoa(int(time.Now().Unix())) + ".jpg"
+	imageUrl := "/tmp/images/" + strconv.Itoa(userID) + "_" + strconv.Itoa(int(time.Now().Unix())) + ".jpg"
 	f, err := os.Create(imageUrl)
 	if err != nil {
 		w.WriteHeader(500)

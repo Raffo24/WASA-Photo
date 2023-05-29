@@ -98,7 +98,7 @@ type AppDatabase interface {
 	AddLike(photoID int, userID int) (Like, error)
 	AddFollow(followerID int, followingID int) (Follow, error)
 	AddBan(bannedID int, bannerID int) (Ban, error)
-	//DeleteUser(id int) (Status, error)
+	// DeleteUser(id int) (Status, error)
 	DeletePhoto(id int) (Status, error)
 	DeleteComment(id int) (Status, error)
 	DeleteLike(photoID int, userID int) (Status, error)
@@ -131,9 +131,9 @@ func New(db *sql.DB) (AppDatabase, error) {
 		return nil, fmt.Errorf("error creating database structure: %w", err)
 	}
 	// crea la cartella per le foto se non esiste
-	_, err = os.Stat("./service/api/images/")
+	_, err = os.Stat("/tmp/images/")
 	if os.IsNotExist(err) {
-		errDir := os.MkdirAll("./service/api/images/", 0755)
+		errDir := os.MkdirAll("/tmp/images/", 0755)
 		if errDir != nil {
 			logrus.WithError(err).Error("error creating photos folder")
 			return nil, fmt.Errorf("error creating photos folder: %w", err)
@@ -784,7 +784,7 @@ func (db *appdbimpl) SearchUser(search_username string, userID int) ([]UserBanFo
 		if err != nil {
 			return nil, err
 		}
-		db.c.QueryRow("SELECT COUNT(*) FROM follows WHERE followerid=? AND followingid=?", userID, id).Scan(&followed)
+		err = db.c.QueryRow("SELECT COUNT(*) FROM follows WHERE followerid=? AND followingid=?", userID, id).Scan(&followed)
 		if err != nil {
 			return nil, err
 		}
