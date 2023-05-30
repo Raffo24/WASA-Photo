@@ -87,7 +87,7 @@ type AppDatabase interface {
 	GetFollowersID(userID int) ([]User, error)
 	GetFollowingID(userID int) ([]User, error)
 	Ping() error
-	GetPhotos(userID int) ([]Photo, error)
+	GetPhotos(userPhoto int, iAmId int) ([]Photo, error)
 	GetPhoto(photoID int) (Photo, error)
 	GetCommentsByPhotoID(photoID int) ([]Comment, error)
 	GetLikes(photoID int) ([]User, error)
@@ -288,8 +288,8 @@ func (db *appdbimpl) JsonificaCommentsFun(comments []Comment) JsonificaComments 
 		Items: comments,
 	}
 }
-func (db *appdbimpl) GetPhotos(userID int) ([]Photo, error) {
-	rows, err := db.c.Query("SELECT id, userid, photourl, title, description, createdat FROM photos where userid = ?", userID)
+func (db *appdbimpl) GetPhotos(userPhoto int, iAmId int) ([]Photo, error) {
+	rows, err := db.c.Query("SELECT id, userid, photourl, title, description, createdat FROM photos where userid = ?", userPhoto)
 	if err != nil {
 		return nil, err
 	}
@@ -300,12 +300,12 @@ func (db *appdbimpl) GetPhotos(userID int) ([]Photo, error) {
 	}()
 	for rows.Next() {
 		var id int
-		var userid int
+		var user int
 		var photourl string
 		var title string
 		var description string
 		var createdat time.Time
-		err = rows.Scan(&id, &userid, &photourl, &title, &description, &createdat)
+		err = rows.Scan(&id, &user, &photourl, &title, &description, &createdat)
 		if err != nil {
 			return nil, err
 		}
@@ -321,17 +321,17 @@ func (db *appdbimpl) GetPhotos(userID int) ([]Photo, error) {
 		if err != nil {
 			return nil, err
 		}
-		err = db.c.QueryRow("SELECT count(*) FROM likes WHERE photoid = ? AND userid = ?", id, userID).Scan(&liked)
+		err = db.c.QueryRow("SELECT count(*)>0 FROM likes WHERE photoid = ? AND userid = ?", id, iAmId).Scan(&liked)
 		if err != nil {
 			return nil, err
 		}
-		err = db.c.QueryRow("SELECT username FROM users WHERE id = ?", userid).Scan(&username)
+		err = db.c.QueryRow("SELECT username FROM users WHERE id = ?", user).Scan(&username)
 		if err != nil {
 			return nil, err
 		}
 		photos = append(photos, Photo{
 			ID:          id,
-			UserID:      userid,
+			UserID:      user,
 			Username:    username,
 			Photourl:    photourl,
 			Title:       title,
@@ -499,12 +499,12 @@ func (db *appdbimpl) GetFeed(userID int) ([]Photo, error) {
 	}()
 	for rows.Next() {
 		var id int
-		var userID int
+		var user int
 		var photourl string
 		var title string
 		var description string
 		var createdat time.Time
-		err = rows.Scan(&id, &userID, &photourl, &title, &description, &createdat)
+		err = rows.Scan(&id, &user, &photourl, &title, &description, &createdat)
 		if err != nil {
 			return nil, err
 		}
@@ -520,17 +520,17 @@ func (db *appdbimpl) GetFeed(userID int) ([]Photo, error) {
 		if err != nil {
 			return nil, err
 		}
-		err = db.c.QueryRow("SELECT count(*) FROM likes WHERE photoid = ? AND userid = ?", id, userID).Scan(&liked)
+		err = db.c.QueryRow("SELECT count(*) > 0 FROM likes WHERE photoid = ? AND userid = ?", id, userID).Scan(&liked)
 		if err != nil {
 			return nil, err
 		}
-		err = db.c.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&username)
+		err = db.c.QueryRow("SELECT username FROM users WHERE id = ?", user).Scan(&username)
 		if err != nil {
 			return nil, err
 		}
 		photos = append(photos, Photo{
 			ID:          id,
-			UserID:      userID,
+			UserID:      user,
 			Username:    username,
 			Photourl:    photourl,
 			Title:       title,
@@ -566,7 +566,7 @@ func (db *appdbimpl) GetUserExtendedByID(id int) (UserExtended, error) {
 	if err != nil {
 		return UserExtended{}, err
 	}
-	photos, err := db.GetPhotos(id)
+	photos, err := db.GetPhotos(id, id)
 	if err != nil {
 		return UserExtended{}, err
 	}
@@ -676,7 +676,7 @@ func (db *appdbimpl) AddBan(bannedID int, bannerID int) (Ban, error) {
 		return Status{}, errors.New("USER NOT FOUND")
 	}
 	// delete all photos
-	photos, err := db.GetPhotos(id)
+	photos, err := db.GetPhotos(id, id)
 	if err == nil {
 		for idx := range photos {
 			photo, err := db.GetPhoto(photos[idx].ID)

@@ -104,7 +104,7 @@ func (rt *_router) getUserHandler(w http.ResponseWriter, r *http.Request, ps htt
 	finalize(user, err, w, 200)
 }
 func (rt *_router) getUserPhotosHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	flag, _ := rt.youAreLogged(r, w)
+	flag, iAmId := rt.youAreLogged(r, w)
 	if flag {
 		return
 	}
@@ -117,7 +117,7 @@ func (rt *_router) getUserPhotosHandler(w http.ResponseWriter, r *http.Request, 
 	if rt.securityChecker(userID, r, w) {
 		return
 	}
-	output, err := rt.db.GetPhotos(userID)
+	output, err := rt.db.GetPhotos(userID, iAmId)
 	if err != nil {
 		w.WriteHeader(404)
 		logerr(w.Write([]byte("user id not exist")))
@@ -341,7 +341,7 @@ func (rt *_router) uploadPhotoHandler(w http.ResponseWriter, r *http.Request, ps
 	}
 	defer file.Close()
 	// store uploaded file into local path
-	imageUrl := "/tmp/images/" + strconv.Itoa(userID) + "_" + strconv.Itoa(int(time.Now().Unix())) + ".jpg"
+	imageUrl := "./images/" + strconv.Itoa(userID) + "_" + strconv.Itoa(int(time.Now().Unix())) + ".jpg"
 	f, err := os.Create(imageUrl)
 	if err != nil {
 		w.WriteHeader(500)
